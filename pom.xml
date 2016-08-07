@@ -1,0 +1,486 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.neptune.api.requestdelayer</groupId>
+	<artifactId>requestdelayer</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+
+	<packaging>war</packaging>
+
+	<name>Request Delayer</name>
+	<description>Request Delayer API Service</description>
+	<url>http://pha.neptune.li/project/profile/12/</url>
+	<inceptionYear>2015</inceptionYear>
+	<licenses>
+		<license>
+			<name>UNLICENSED</name>
+		</license>
+	</licenses>
+	<organization>
+		<name>Neptune</name>
+		<url>http://neptune.li</url>
+	</organization>
+
+	<issueManagement>
+		<system>Phabricator Maniphest</system>
+		<url>http://pha.neptune.li/maniphest/</url>
+	</issueManagement>
+	<ciManagement>
+		<system>Jenkins</system>
+		<url>http://jen.neptune.li/job/RequestDelayer/</url>
+	</ciManagement>
+	<scm>
+		<connection>scm:git:http://pha.neptune.li/diffusion/ARDELAYER/requestdelayer.git</connection>
+		<url>http://pha.neptune.li/diffusion/ARDELAYER/</url>
+	</scm>
+
+	<!-- Build Environments -->
+	<profiles>
+		<profile>
+			<id>profile-development</id>
+			<properties>
+				<environment>development</environment>
+				<tomcat.user>rafael-script</tomcat.user>
+				<tomcat.pass>rafael</tomcat.pass>
+				<tomcat.url>http://localhost:8080/manager/text</tomcat.url>
+			</properties>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+				<property>
+					<name>environment</name>
+					<value>development</value>
+				</property>
+			</activation>
+		</profile>
+		<profile>
+			<id>profile-staging</id>
+			<properties>
+				<environment>staging</environment>
+				<tomcat.user>tom-script</tomcat.user>
+				<tomcat.pass>kT2#32CsAs</tomcat.pass>
+				<tomcat.url>http://io.li:8080/manager/text</tomcat.url>
+			</properties>
+			<activation>
+				<property>
+					<name>environment</name>
+					<value>staging</value>
+				</property>
+			</activation>
+		</profile>
+		<profile>
+			<id>profile-production</id>
+			<properties>
+				<environment>production</environment>
+				<tomcat.user>tom-script</tomcat.user>
+				<tomcat.pass>Yc2I9zTUp#</tomcat.pass>
+				<tomcat.url>http://neptune.li:8080/manager/text</tomcat.url>
+			</properties>
+			<activation>
+				<property>
+					<name>environment</name>
+					<value>production</value>
+				</property>
+			</activation>
+		</profile>
+	</profiles>
+
+	<properties>
+
+		<!-- encoding -->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<!--java version -->
+		<java-version>1.8</java-version>
+
+		<!-- Build plugin versions -->
+		<compiler-plugin-version>3.5.1</compiler-plugin-version>
+		<dependency-plugin-version>2.10</dependency-plugin-version>
+
+		<ejb-plugin-version>2.3</ejb-plugin-version>
+		<war-plugin-version>2.4</war-plugin-version>
+		<maven-tomcat-plugin-version>2.2</maven-tomcat-plugin-version>
+		<resources-plugin-version>2.7</resources-plugin-version>
+
+		<!-- EJB spec version -->
+		<ejb-spec-version>3.2</ejb-spec-version>
+
+		<!-- Report plugin versions -->
+		<project-info-plugin-version>2.9</project-info-plugin-version>
+		<jacoco-plugin-version>0.7.7.201606060606</jacoco-plugin-version>
+		<surefire-report-plugin-version>2.19.1</surefire-report-plugin-version>
+		<javadoc-plugin-version>2.10.4</javadoc-plugin-version>
+		<javancss-plugin-version>2.1</javancss-plugin-version>
+		<pmd-plugin-version>3.6</pmd-plugin-version>
+		<jxr-plugin-version>2.5</jxr-plugin-version>
+		<checkstyle-plugin-version>2.17</checkstyle-plugin-version>
+		<findbugs-plugin-version>3.0.4</findbugs-plugin-version>
+
+		<jersey-version>2.23.1</jersey-version>
+		<hibernate-version>4.3.10.Final</hibernate-version>
+
+		<linking-lang-version>2.2.4</linking-lang-version>
+		<validation-version>1.1.0.Final</validation-version>
+
+		<cdi-version>1.2</cdi-version>
+		<weld-version>2.3.5.Final</weld-version>
+		<jandex-version>2.0.3.Final</jandex-version>
+
+		<connector-version>5.1.35</connector-version>
+
+		<joda-version>2.8.1</joda-version>
+
+		<jsoup-version>1.8.2</jsoup-version>
+
+		<log4j-version>2.3</log4j-version>
+
+		<junit-version>4.11</junit-version>
+
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+
+			<!-- Jersey -->
+			<dependency>
+				<groupId>org.glassfish.jersey</groupId>
+				<artifactId>jersey-bom</artifactId>
+				<version>${jersey-version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+		</dependencies>
+	</dependencyManagement>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>com.neptune.api.template</groupId>
+			<artifactId>template-server</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.neptune.api.template</groupId>
+			<artifactId>template-storage</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+			<version>${joda-version}</version>
+		</dependency>
+
+		<!-- Linking language -->
+		<dependency>
+			<groupId>org.glassfish.web</groupId>
+			<artifactId>javax.el</artifactId>
+			<version>${linking-lang-version}</version>
+		</dependency>
+
+
+		<!-- !!Jersey Dependencies!! -->
+
+		<dependency>
+			<groupId>org.glassfish.jersey.core</groupId>
+			<artifactId>jersey-server</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.glassfish.jersey.containers</groupId>
+			<artifactId>jersey-container-servlet</artifactId>
+		</dependency>
+
+		<!-- Media Moxy -->
+		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-moxy</artifactId>
+		</dependency>
+
+		<!-- Declarative Linking -->
+		<dependency>
+			<groupId>org.glassfish.jersey.ext</groupId>
+			<artifactId>jersey-declarative-linking</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.glassfish.jersey.ext.cdi</groupId>
+			<artifactId>jersey-cdi1x</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.glassfish.jersey.ext.cdi</groupId>
+			<artifactId>jersey-cdi1x-servlet</artifactId>
+		</dependency>
+
+
+		<!-- !!Hibernate!! -->
+
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>${connector-version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-entitymanager</artifactId>
+			<version>${hibernate-version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-c3p0</artifactId>
+			<version>${hibernate-version}</version>
+		</dependency>
+
+
+		<!-- DI -->
+		<dependency>
+			<groupId>javax.enterprise</groupId>
+			<artifactId>cdi-api</artifactId>
+			<version>${cdi-version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jboss.weld.servlet</groupId>
+			<artifactId>weld-servlet</artifactId>
+			<version>${weld-version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jboss</groupId>
+			<artifactId>jandex</artifactId>
+			<version>${jandex-version}</version>
+		</dependency>
+
+		<!-- jsoup HTML parser library @ http://jsoup.org/ -->
+		<dependency>
+			<groupId>org.jsoup</groupId>
+			<artifactId>jsoup</artifactId>
+			<version>${jsoup-version}</version>
+		</dependency>
+
+
+		<!-- EJB Espec -->
+		<dependency>
+			<groupId>javax.ejb</groupId>
+			<artifactId>javax.ejb-api</artifactId>
+			<version>${ejb-spec-version}</version>
+		</dependency>
+
+		<!-- Tests -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit-version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>2.0.94-beta</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Logger -->
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>${log4j-version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>${log4j-version}</version>
+		</dependency>
+
+	</dependencies>
+
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>${project-info-plugin-version}</version>
+				<configuration>
+					<dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-report-plugin</artifactId>
+				<version>${surefire-report-plugin-version}</version>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>${javadoc-plugin-version}</version>
+				<configuration>
+					<show>private</show>
+					<nohelp>true</nohelp>
+				</configuration>
+				<reportSets>
+					<reportSet>
+						<id>default</id>
+						<reports>
+							<report>javadoc</report>
+						</reports>
+					</reportSet>
+					<reportSet>
+						<id>aggregate</id>
+						<reports>
+							<report>aggregate</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-pmd-plugin</artifactId>
+				<version>${pmd-plugin-version}</version>
+				<configuration>
+					<minimumTokens>100</minimumTokens>
+					<linkXref>true</linkXref>
+					<excludes>
+						<exclude>**/*Bean.java</exclude>
+						<exclude>**/generated/*.java</exclude>
+					</excludes>
+					<excludeRoots>
+						<excludeRoot>target/generated-sources/stubs</excludeRoot>
+					</excludeRoots>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jxr-plugin</artifactId>
+				<version>${jxr-plugin-version}</version>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>${checkstyle-plugin-version}</version>
+				<configuration>
+					<linkXref>true</linkXref>
+				</configuration>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>checkstyle</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>findbugs-maven-plugin</artifactId>
+				<version>${findbugs-plugin-version}</version>
+				<configuration>
+					<linkXref>true</linkXref>
+					<xmlOutput>true</xmlOutput>
+					<!-- Optional directory to put findbugs xdoc xml report -->
+					<xmlOutputDirectory>target/site</xmlOutputDirectory>
+				</configuration>
+			</plugin>
+		</plugins>
+	</reporting>
+
+	<build>
+		<finalName>${project.artifactId}</finalName>
+
+		<plugins>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco-plugin-version}</version>
+				<configuration>
+					<output>file</output>
+					<append>true</append>
+				</configuration>
+				<executions>
+					<execution>
+						<id>jacoco-initialize</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>jacoco-site</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>${dependency-plugin-version}</version>
+			</plugin>
+
+			<!-- compiler plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${compiler-plugin-version}</version>
+				<inherited>true</inherited>
+				<configuration>
+					<source>${java-version}</source>
+					<target>${java-version}</target>
+					<encoding>${project.build.sourceEncoding}</encoding>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-ejb-plugin</artifactId>
+				<version>${ejb-plugin-version}</version>
+				<configuration>
+					<ejbVersion>${ejb-spec-version}</ejbVersion>
+				</configuration>
+			</plugin>
+
+			<!-- Tomcat plugin -->
+			<!-- <plugin> <groupId>org.apache.tomcat.maven</groupId> <artifactId>tomcat7-maven-plugin</artifactId> 
+				<version>${maven-tomcat-plugin-version}</version> <configuration> <path>/${project.artifactId}</path> 
+				<update>true</update> <url>${tomcat.url}</url> <username>${tomcat.user}</username> 
+				<password>${tomcat.pass}</password> </configuration> </plugin> -->
+
+			<!-- Resources Plugin -->
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>${resources-plugin-version}</version>
+				<executions>
+					<execution>
+						<id>copy-resources</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${basedir}/target/classes</outputDirectory>
+							<resources>
+								<resource>
+									<directory>src/extra/${environment}</directory>
+									<filtering>true</filtering>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+
+	</build>
+</project>
