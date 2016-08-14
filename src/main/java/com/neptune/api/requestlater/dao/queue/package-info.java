@@ -5,4 +5,4 @@
  * @author Rafael R. Itajuba
  * @version 0.0.1-SNAPSHOT
  */
-package com.neptune.api.requestdelayer.dao.queue;
+package com.neptune.api.requestlater.dao.queue;

@@ -2,14 +2,14 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.neptune.api.requestdelayer</groupId>
-	<artifactId>requestdelayer</artifactId>
+	<groupId>com.neptune.api.requestlater</groupId>
+	<artifactId>requestlater-api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 
 	<packaging>war</packaging>
 
-	<name>Request Delayer</name>
-	<description>Request Delayer API Service</description>
+	<name>RequestLater</name>
+	<description>RequestLater API Service</description>
 	<url>http://pha.neptune.li/project/profile/12/</url>
 	<inceptionYear>2015</inceptionYear>
 	<licenses>
@@ -135,6 +135,8 @@
 
 		<junit-version>4.11</junit-version>
 
+		<apitemplate-version>0.0.1-SNAPSHOT</apitemplate-version>
+		<delayedqueue-version>0.0.1-SNAPSHOT</delayedqueue-version>
 	</properties>
 
 	<dependencyManagement>
@@ -157,13 +159,19 @@
 		<dependency>
 			<groupId>com.neptune.api.template</groupId>
 			<artifactId>template-server</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${apitemplate-version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.neptune.api.template</groupId>
 			<artifactId>template-storage</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${apitemplate-version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.neptune.delayedqueue</groupId>
+			<artifactId>delayedqueue</artifactId>
+			<version>${delayedqueue-version}</version>
 		</dependency>
 
 		<dependency>
@@ -193,10 +201,10 @@
 		</dependency>
 
 		<!-- Media Moxy -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.glassfish.jersey.media</groupId> -->
-<!-- 			<artifactId>jersey-media-moxy</artifactId> -->
-<!-- 		</dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.glassfish.jersey.media</groupId> -->
+		<!-- <artifactId>jersey-media-moxy</artifactId> -->
+		<!-- </dependency> -->
 
 		<dependency>
 			<groupId>org.glassfish.jersey.media</groupId>

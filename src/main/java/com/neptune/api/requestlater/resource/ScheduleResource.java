@@ -1,10 +1,10 @@
-package com.neptune.api.requestdelayer.resource;
+package com.neptune.api.requestlater.resource;
 
 import javax.inject.Inject;
 import javax.ws.rs.Path;
 
-import com.neptune.api.requestdelayer.domain.Request;
-import com.neptune.api.requestdelayer.service.ScheduleService;
+import com.neptune.api.requestlater.domain.Request;
+import com.neptune.api.requestlater.service.ScheduleService;
 import com.neptune.api.template.resource.ResourceTemplate;
 
 @Path("/schedules")

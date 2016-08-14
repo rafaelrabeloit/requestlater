@@ -1,4 +1,4 @@
-package com.neptune.api.requestdelayer.dao.queue;
+package com.neptune.api.requestlater.dao.queue;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;

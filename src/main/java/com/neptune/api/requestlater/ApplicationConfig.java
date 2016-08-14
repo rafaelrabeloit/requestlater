@@ -1,4 +1,4 @@
-package com.neptune.api.requestdelayer;
+package com.neptune.api.requestlater;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -9,8 +9,8 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.linking.DeclarativeLinkingFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 
-import com.neptune.api.requestdelayer.filter.CORSResponseFilter;
-import com.neptune.api.requestdelayer.handler.ApplicationEventHandler;
+import com.neptune.api.requestlater.filter.CORSResponseFilter;
+import com.neptune.api.requestlater.handler.ApplicationEventHandler;
 
 @ApplicationPath("/")
 public class ApplicationConfig extends ResourceConfig {

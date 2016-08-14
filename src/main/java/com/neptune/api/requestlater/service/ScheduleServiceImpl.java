@@ -1,12 +1,12 @@
-package com.neptune.api.requestdelayer.service;
+package com.neptune.api.requestlater.service;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
-import com.neptune.api.requestdelayer.dao.ScheduleDAO;
+import com.neptune.api.requestlater.dao.ScheduleDAO;
+import com.neptune.api.requestlater.domain.Request;
 import com.neptune.api.template.service.ServiceTemplateImpl;
 import com.neptune.api.template.storage.JPAStorage;
-import com.neptune.api.requestdelayer.domain.Request;
 
 @Stateless
 public class ScheduleServiceImpl extends ServiceTemplateImpl<Request>

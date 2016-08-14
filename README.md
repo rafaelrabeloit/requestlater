@@ -1,29 +1,25 @@
-Delayed Queue Library
-=====================
-This project implements (or tries to) the urgent needed Delayed Queue for 
-Workers and Tasks.  
-It does so by extending the already defined PriorityBlockingQueue from the 
-Java Collections, and adding Executors to it.
-
-**There are 3 executors:**
-
-* **Scheduler:** Is the responsible for scheduling the lone task of consuming
-elements. Only one task is fired at once in this thread pool, and reschedules
-itself to the next element in the queue before dying.
-* **Callbacks:** This executor is a pool of Threads fired to run the onTime 
-method from the Listener. We do this because the Scheduler Task could be 
-blocked by some extensive operation done in the callback.
-* **Runners:** The runners executor is the Thread pool responsible for firing 
-the jobs. By that we mean that we can actually store Tasks in the Queue, and 
-these tasks (Runnables) will fire when they are about to be consumed.
-
-Note about Elements consumption
--------------------------------
-Elements are bound to be consumed with a certain delay. When those elements are 
-consumed, they are going to be executed, if they are Runnables.  
-Also, the onTime event method will be fired in a callback thread.  
-Therefore, there are 2 ways of responding to a element being consumed by the 
-queue: by implementing Runnable on the elements themselves or by registering a 
- listener object.  
-They are supposed to be equivalents, but different approaches to tackle the 
-same problem.
+RequestLater API Service
+=========================
+This project is about scheduling API requests, in a microservice context.  
+The original idea was about making "scraping-as-a-service", but as everything 
+that I code, I took a more generic approach and make the request itself a 
+service.
+  
+Motive
+------
+My reason to have a "request-as-a-service" is that are several occasions in 
+which it may be helpful to have a request to a REST service been delayed 
+to a certain time, for microservices.  
+The scraping service is one example. I may want to have a data for some site 
+transformed into data constantly.  
+Yet another useful situation would be a limited resource machine scheduling 
+calls to moments when it thinks it will have time to process something.  
+Or heavy jobs being scheduled to low request times.  
+Or mailing services.  
+Or anything that would be done with cron rules.  
+*I would go farther:* Lets make asynchronous API. Not only pubsub, but really 
+async, by making requests being made at a some point and only a response about 
+it being accepted and not processed sent back to the client. The process would 
+be made in an arbitrary time and the result would be returned in a new request, 
+fired by the API itself, to the "client".  
+My ultimate motive is that it was fun to do. :)

@@ -1,11 +1,11 @@
-package com.neptune.api.requestdelayer.dao.jpa;
+package com.neptune.api.requestlater.dao.jpa;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
-import com.neptune.api.requestdelayer.ApplicationConfig;
-import com.neptune.api.requestdelayer.dao.ScheduleDAO;
-import com.neptune.api.requestdelayer.domain.Request;
+import com.neptune.api.requestlater.ApplicationConfig;
+import com.neptune.api.requestlater.dao.ScheduleDAO;
+import com.neptune.api.requestlater.domain.Request;
 import com.neptune.api.template.dao.Ordering;
 import com.neptune.api.template.dao.Ordering.Direction;
 import com.neptune.api.template.storage.StorageTemplateJPA;

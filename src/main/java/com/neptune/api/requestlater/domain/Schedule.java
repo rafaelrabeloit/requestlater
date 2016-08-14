@@ -1,19 +1,16 @@
-package com.neptune.api.requestdelayer.domain;
+package com.neptune.api.requestlater.domain;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedList;
+import java.util.List;
 
-import javax.persistence.CollectionTable;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.MapKeyColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -29,9 +26,9 @@ import com.neptune.api.template.domain.DomainTemplate;
  * @author Rafael Rabelo
  */
 @Entity
-@Table(name = "_requests")
+@Table(name = "_schedules")
 @XmlRootElement
-public class Request extends DomainTemplate implements java.io.Serializable {
+public class Schedule extends DomainTemplate implements java.io.Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -40,18 +37,16 @@ public class Request extends DomainTemplate implements java.io.Serializable {
 
     private Date createdOn;
 
-    private Map<String, String> headers;
+    private List<Request> requests;
 
-    private Schedule schedule;
-
-    public Request() {
+    public Schedule() {
         super();
 
         this.createdOn = new Date();
-        this.headers = new HashMap<String, String>();
+        this.requests = new LinkedList<Request>();
     }
 
-    public Request(Integer id, String randomId) {
+    public Schedule(Integer id, String randomId) {
         this();
 
         this.id = id;
@@ -97,27 +92,12 @@ public class Request extends DomainTemplate implements java.io.Serializable {
         this.createdOn = new Date();
     }
 
-    @ElementCollection
-    @MapKeyColumn(name = "header")
-    @Column(name = "value")
-    @CollectionTable(name = "_headers", joinColumns = @JoinColumn(name = "id"))
-    public Map<String, String> getHeaders() {
-        return this.headers;
+    @OneToMany(mappedBy = "schedule", targetEntity = Request.class, fetch = FetchType.EAGER)
+    public List<Request> getRequests() {
+        return this.requests;
     }
 
-    public void setHeaders(Map<String, String> headers) {
-        this.headers = headers;
+    public void setRequests(List<Request> requests) {
+        this.requests = requests;
     }
-
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "schedule_id", referencedColumnName = "id")
-    @XmlTransient
-    public Schedule getSchedule() {
-        return schedule;
-    }
-
-    public void setSchedule(Schedule schedule) {
-        this.schedule = schedule;
-    }
-
 }
