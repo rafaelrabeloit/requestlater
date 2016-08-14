@@ -116,7 +116,7 @@
 		<findbugs-plugin-version>3.0.4</findbugs-plugin-version>
 
 		<jersey-version>2.23.1</jersey-version>
-		<hibernate-version>4.3.10.Final</hibernate-version>
+		<hibernate-version>5.2.2.Final</hibernate-version>
 
 		<linking-lang-version>2.2.4</linking-lang-version>
 		<validation-version>1.1.0.Final</validation-version>
@@ -193,9 +193,14 @@
 		</dependency>
 
 		<!-- Media Moxy -->
+<!-- 		<dependency> -->
+<!-- 			<groupId>org.glassfish.jersey.media</groupId> -->
+<!-- 			<artifactId>jersey-media-moxy</artifactId> -->
+<!-- 		</dependency> -->
+
 		<dependency>
 			<groupId>org.glassfish.jersey.media</groupId>
-			<artifactId>jersey-media-moxy</artifactId>
+			<artifactId>jersey-media-json-jackson</artifactId>
 		</dependency>
 
 		<!-- Declarative Linking -->
@@ -204,6 +209,7 @@
 			<artifactId>jersey-declarative-linking</artifactId>
 		</dependency>
 
+		<!-- CDI for jersey -->
 		<dependency>
 			<groupId>org.glassfish.jersey.ext.cdi</groupId>
 			<artifactId>jersey-cdi1x</artifactId>
@@ -238,14 +244,8 @@
 
 		<!-- DI -->
 		<dependency>
-			<groupId>javax.enterprise</groupId>
-			<artifactId>cdi-api</artifactId>
-			<version>${cdi-version}</version>
-		</dependency>
-
-		<dependency>
 			<groupId>org.jboss.weld.servlet</groupId>
-			<artifactId>weld-servlet</artifactId>
+			<artifactId>weld-servlet-core</artifactId>
 			<version>${weld-version}</version>
 		</dependency>
 
@@ -288,13 +288,7 @@
 		<!-- Logger -->
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-api</artifactId>
-			<version>${log4j-version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-core</artifactId>
+			<artifactId>log4j-web</artifactId>
 			<version>${log4j-version}</version>
 		</dependency>
 

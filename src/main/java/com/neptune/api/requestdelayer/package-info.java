@@ -1,9 +1,5 @@
 /**
- * Queue related classes
- * <p>
- * This package is used to produce Delayed Queues.
- * These queues will fire a thread associated to its Item after a certain time.
- * </p>
+ * REST API used to schedule requests.
  *
  * @since 0.0.1-SNAPSHOT
  * @author Rafael R. Itajuba
