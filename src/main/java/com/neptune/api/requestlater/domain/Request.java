@@ -3,13 +3,13 @@ package com.neptune.api.requestlater.domain;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -21,12 +21,14 @@ import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
+import org.hibernate.annotations.GenericGenerator;
+
 import com.neptune.api.template.domain.DomainTemplate;
 
 /**
  * Request Model
  * 
- * @author Rafael Rabelo
+ * @author Rafael R. Itajuba
  */
 @Entity
 @Table(name = "_requests")
@@ -35,9 +37,7 @@ public class Request extends DomainTemplate implements java.io.Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private Integer id;
-    private String randomId;
-
+    private UUID id;
     private Date createdOn;
 
     private Map<String, String> headers;
@@ -47,58 +47,50 @@ public class Request extends DomainTemplate implements java.io.Serializable {
     public Request() {
         super();
 
-        this.createdOn = new Date();
+        this.id = UUID.randomUUID();
         this.headers = new HashMap<String, String>();
     }
 
-    public Request(Integer id, String randomId) {
+    public Request(UUID id) {
         this();
 
         this.id = id;
-        this.randomId = randomId;
     }
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", unique = true, nullable = false, updatable = false)
-    @XmlTransient
+    @GeneratedValue(generator = "uuid2")
+    @GenericGenerator(name = "uuid2", strategy = "uuid2")    
+    @Column(columnDefinition = "BINARY(16)", name = "id", unique = true, nullable = false, updatable = false)
     @Override
-    public Integer getId() {
+    public UUID getId() {
         return this.id;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    @Column(name = "random_id", unique = false, nullable = false, updatable = false, length = 7)
-    @XmlTransient
     @Override
-    public String getRandomId() {
-        return this.randomId;
-    }
-
-    public void setRandomId(String randomId) {
-        this.randomId = randomId;
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_on", nullable = false, updatable = false)
+    @Override
     public Date getCreatedOn() {
         return createdOn;
     }
 
+    @Override
     public void setCreatedOn(Date createdOn) {
         this.createdOn = createdOn;
     }
 
     @PrePersist
+    @Override
     protected void onCreate() {
         this.createdOn = new Date();
     }
 
     @ElementCollection
-    @MapKeyColumn(name = "header")
+    @MapKeyColumn(name = "request_id")
     @Column(name = "value")
     @CollectionTable(name = "_headers", joinColumns = @JoinColumn(name = "id"))
     public Map<String, String> getHeaders() {

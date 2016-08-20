@@ -5,14 +5,15 @@ import javax.persistence.EntityManager;
 
 import com.neptune.api.requestlater.ApplicationConfig;
 import com.neptune.api.requestlater.dao.ScheduleDAO;
-import com.neptune.api.requestlater.domain.Request;
+import com.neptune.api.requestlater.domain.Schedule;
 import com.neptune.api.template.dao.Ordering;
 import com.neptune.api.template.dao.Ordering.Direction;
-import com.neptune.api.template.storage.StorageTemplateJPA;
 import com.neptune.api.template.storage.JPAStorage;
+import com.neptune.api.template.storage.StorageTemplateJPA;
 
 @JPAStorage
-public class ScheduleJPA extends StorageTemplateJPA<Request> implements ScheduleDAO {
+public class ScheduleJPA extends StorageTemplateJPA<Schedule>
+        implements ScheduleDAO {
 
     /**
      * 
@@ -22,10 +23,10 @@ public class ScheduleJPA extends StorageTemplateJPA<Request> implements Schedule
     @Inject
     public ScheduleJPA() {
         super();
-        
+
         //
         this.getOrders().add(new Ordering(Direction.ASC, "createdOn"));
-        
+
         //
         this.em = ApplicationConfig.newEntityManager();
     }
