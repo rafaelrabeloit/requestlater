@@ -1,5 +1,6 @@
-/target/
-/.settings/
-/.classpath
-/.dropbox
-/.project
+/*/target/
+/*/.settings/
+/*/.classpath
+/*/.dropbox
+/*/.project
+/*/desktop.ini

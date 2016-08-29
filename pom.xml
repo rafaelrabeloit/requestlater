@@ -89,6 +89,7 @@
 
 		<!-- encoding -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<!--java version -->
 		<java-version>1.8</java-version>
 
@@ -186,6 +187,14 @@
 			<version>4.5.2</version>
 		</dependency>
 
+		<!-- EJB Espec -->
+		<dependency>
+			<groupId>javax.ejb</groupId>
+			<artifactId>javax.ejb-api</artifactId>
+			<version>${ejb-spec-version}</version>
+		</dependency>
+
+
 		<!-- Linking language -->
 		<dependency>
 			<groupId>org.glassfish.web</groupId>
@@ -205,12 +214,6 @@
 			<groupId>org.glassfish.jersey.containers</groupId>
 			<artifactId>jersey-container-servlet</artifactId>
 		</dependency>
-
-		<!-- Media Moxy -->
-		<!-- <dependency> -->
-		<!-- <groupId>org.glassfish.jersey.media</groupId> -->
-		<!-- <artifactId>jersey-media-moxy</artifactId> -->
-		<!-- </dependency> -->
 
 		<dependency>
 			<groupId>org.glassfish.jersey.media</groupId>
@@ -269,21 +272,6 @@
 			<version>${jandex-version}</version>
 		</dependency>
 
-		<!-- jsoup HTML parser library @ http://jsoup.org/ -->
-		<dependency>
-			<groupId>org.jsoup</groupId>
-			<artifactId>jsoup</artifactId>
-			<version>${jsoup-version}</version>
-		</dependency>
-
-
-		<!-- EJB Espec -->
-		<dependency>
-			<groupId>javax.ejb</groupId>
-			<artifactId>javax.ejb-api</artifactId>
-			<version>${ejb-spec-version}</version>
-		</dependency>
-
 		<!-- Tests -->
 		<dependency>
 			<groupId>junit</groupId>
@@ -296,6 +284,13 @@
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
 			<version>2.0.94-beta</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+			<version>3.4.1</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -323,6 +318,14 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-report-plugin</artifactId>
 				<version>${surefire-report-plugin-version}</version>
+				<reportSets>
+					<reportSet>
+						<id>integration-tests</id>
+						<reports>
+							<report>failsafe-report-only</report>
+						</reports>
+					</reportSet>
+				</reportSets>
 			</plugin>
 
 			<plugin>
@@ -399,6 +402,7 @@
 					<xmlOutputDirectory>target/site</xmlOutputDirectory>
 				</configuration>
 			</plugin>
+
 		</plugins>
 	</reporting>
 
@@ -406,6 +410,12 @@
 		<finalName>${project.artifactId}</finalName>
 
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.6</version>
+			</plugin>
+
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
@@ -452,42 +462,116 @@
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-ejb-plugin</artifactId>
-				<version>${ejb-plugin-version}</version>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${surefire-report-plugin-version}</version>
 				<configuration>
-					<ejbVersion>${ejb-spec-version}</ejbVersion>
+					<!-- Skips unit tests if the value of skip.unit.tests property is true -->
+					<skipTests>false</skipTests>
+					<!-- Excludes integration tests when unit tests are run -->
+					<excludes>
+						<exclude>**/*IntegrationTest*.java</exclude>
+					</excludes>
 				</configuration>
 			</plugin>
 
-			<!-- Tomcat plugin -->
-			<!-- <plugin> <groupId>org.apache.tomcat.maven</groupId> <artifactId>tomcat7-maven-plugin</artifactId> 
-				<version>${maven-tomcat-plugin-version}</version> <configuration> <path>/${project.artifactId}</path> 
-				<update>true</update> <url>${tomcat.url}</url> <username>${tomcat.user}</username> 
-				<password>${tomcat.pass}</password> </configuration> </plugin> -->
-
-			<!-- Resources Plugin -->
 			<plugin>
-				<artifactId>maven-resources-plugin</artifactId>
-				<version>${resources-plugin-version}</version>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>2.19.1</version>
+				<configuration>
+					<includes>
+						<include>**/*IntegrationTest*</include>
+					</includes>
+				</configuration>
 				<executions>
 					<execution>
-						<id>copy-resources</id>
-						<phase>validate</phase>
+						<id>integration-test</id>
 						<goals>
-							<goal>copy-resources</goal>
+							<goal>integration-test</goal>
 						</goals>
-						<configuration>
-							<outputDirectory>${basedir}/target/classes</outputDirectory>
-							<resources>
-								<resource>
-									<directory>src/extra/${environment}</directory>
-									<filtering>true</filtering>
-								</resource>
-							</resources>
-						</configuration>
+					</execution>
+					<execution>
+						<id>verify</id>
+						<goals>
+							<goal>verify</goal>
+						</goals>
 					</execution>
 				</executions>
 			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.cargo</groupId>
+				<artifactId>cargo-maven2-plugin</artifactId>
+				<version>1.5.0</version>
+				<configuration>
+
+					<!-- Container configuration -->
+					<container>
+						<containerId>tomcat8x</containerId>
+						<type>remote</type>
+					</container>
+
+					<!-- Configuration to use with the container (which will also configure 
+						the deployer) -->
+					<configuration>
+						<type>runtime</type>
+						<properties>
+							<cargo.remote.uri>http://localhost:8080/manager/text</cargo.remote.uri>
+							<cargo.remote.username>rafael</cargo.remote.username>
+							<cargo.remote.password>rafael</cargo.remote.password>
+						</properties>
+					</configuration>
+
+					<!-- Deployables configuration -->
+					<deployables>
+						<deployable>
+							<groupId>${project.groupId}</groupId>
+							<artifactId>${project.artifactId}</artifactId>
+							<type>war</type>
+						</deployable>
+					</deployables>
+
+				</configuration>
+				<executions>
+					<execution>
+						<id>start-tomcat</id>
+						<phase>pre-integration-test</phase>
+						<configuration>
+							<wait>false</wait>
+							<container>
+								<containerId>tomcat8x</containerId>
+								<zipUrlInstaller>
+									<url>http://archive.apache.org/dist/tomcat/tomcat-8/v8.0.23/bin/apache-tomcat-8.0.23.tar.gz</url>
+									<extractDir>${project.directory}/build/extract/</extractDir>
+									<downloadDir>${project.directory}/build/download/</downloadDir>
+								</zipUrlInstaller>
+								<output>${project.directory}/build/tomcat8x.log</output>
+								<log>${project.directory}/build/cargo.log</log>
+							</container>
+							<configuration>
+								<type>existing</type>
+								<home>${project.directory}/build/tomcat-8/container</home>
+								<properties>
+									<cargo.logging>high</cargo.logging>
+									<cargo.servlet.port>9080</cargo.servlet.port>
+									<cargo.tomcat.ajp.port>9008</cargo.tomcat.ajp.port>
+								</properties>
+							</configuration>
+						</configuration>
+						<goals>
+							<goal>start</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>stop-tomcat</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>stop</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
 		</plugins>
 
 	</build>
