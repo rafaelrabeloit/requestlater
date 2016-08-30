@@ -23,3 +23,8 @@ it being accepted and not processed sent back to the client. The process would
 be made in an arbitrary time and the result would be returned in a new request, 
 fired by the API itself, to the "client".  
 My ultimate motive is that it was fun to do. :)
+
+test & deploy
+-------------
+Use mvn cargo:redeploy to execute cargo deployment system
+Use mvn verify to run integration tests

@@ -1,6 +1,15 @@
 /*/target/
+/*/build/
 /*/.settings/
 /*/.classpath
 /*/.dropbox
 /*/.project
 /*/desktop.ini
+
+target/
+build/
+.settings/
+.classpath
+.dropbox
+.project
+desktop.ini

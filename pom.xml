@@ -3,10 +3,15 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.neptune.api.requestlater</groupId>
-	<artifactId>requestlater-api</artifactId>
+	<artifactId>requestlater</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 
-	<packaging>war</packaging>
+	<packaging>pom</packaging>
+
+	<modules>
+		<module>requestlater-api</module>
+		<module>requestlater-it</module>
+	</modules>
 
 	<name>RequestLater</name>
 	<description>RequestLater API Service</description>
@@ -41,7 +46,7 @@
 			<id>profile-development</id>
 			<properties>
 				<environment>development</environment>
-				<tomcat.user>rafael-script</tomcat.user>
+				<tomcat.user>rafael</tomcat.user>
 				<tomcat.pass>rafael</tomcat.pass>
 				<tomcat.url>http://localhost:8080/manager/text</tomcat.url>
 			</properties>
@@ -50,36 +55,6 @@
 				<property>
 					<name>environment</name>
 					<value>development</value>
-				</property>
-			</activation>
-		</profile>
-		<profile>
-			<id>profile-staging</id>
-			<properties>
-				<environment>staging</environment>
-				<tomcat.user>tom-script</tomcat.user>
-				<tomcat.pass>kT2#32CsAs</tomcat.pass>
-				<tomcat.url>http://io.li:8080/manager/text</tomcat.url>
-			</properties>
-			<activation>
-				<property>
-					<name>environment</name>
-					<value>staging</value>
-				</property>
-			</activation>
-		</profile>
-		<profile>
-			<id>profile-production</id>
-			<properties>
-				<environment>production</environment>
-				<tomcat.user>tom-script</tomcat.user>
-				<tomcat.pass>Yc2I9zTUp#</tomcat.pass>
-				<tomcat.url>http://neptune.li:8080/manager/text</tomcat.url>
-			</properties>
-			<activation>
-				<property>
-					<name>environment</name>
-					<value>production</value>
 				</property>
 			</activation>
 		</profile>
@@ -152,427 +127,222 @@
 				<scope>import</scope>
 			</dependency>
 
+			<dependency>
+				<groupId>com.neptune.api.template</groupId>
+				<artifactId>template-server</artifactId>
+				<version>${apitemplate-version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.neptune.api.template</groupId>
+				<artifactId>template-storage</artifactId>
+				<version>${apitemplate-version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.neptune.delayedqueue</groupId>
+				<artifactId>delayedqueue</artifactId>
+				<version>${delayedqueue-version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>joda-time</groupId>
+				<artifactId>joda-time</artifactId>
+				<version>${joda-version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient</artifactId>
+				<version>4.5.2</version>
+			</dependency>
+
+			<!-- EJB Espec -->
+			<dependency>
+				<groupId>javax.ejb</groupId>
+				<artifactId>javax.ejb-api</artifactId>
+				<version>${ejb-spec-version}</version>
+			</dependency>
+
+
+			<!-- Linking language -->
+			<dependency>
+				<groupId>org.glassfish.web</groupId>
+				<artifactId>javax.el</artifactId>
+				<version>${linking-lang-version}</version>
+			</dependency>
+
+
+			<!-- !!Hibernate!! -->
+
+			<dependency>
+				<groupId>mysql</groupId>
+				<artifactId>mysql-connector-java</artifactId>
+				<version>${connector-version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-entitymanager</artifactId>
+				<version>${hibernate-version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-c3p0</artifactId>
+				<version>${hibernate-version}</version>
+			</dependency>
+
+
+			<!-- DI -->
+			<dependency>
+				<groupId>org.jboss.weld.servlet</groupId>
+				<artifactId>weld-servlet-core</artifactId>
+				<version>${weld-version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss</groupId>
+				<artifactId>jandex</artifactId>
+				<version>${jandex-version}</version>
+			</dependency>
+
+			<!-- Tests -->
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>${junit-version}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-core</artifactId>
+				<version>2.0.94-beta</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>com.squareup.okhttp3</groupId>
+				<artifactId>okhttp</artifactId>
+				<version>3.4.1</version>
+				<scope>test</scope>
+			</dependency>
+
+			<!-- Logger -->
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-web</artifactId>
+				<version>${log4j-version}</version>
+			</dependency>
+
+			<!-- Logger -->
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-core</artifactId>
+				<version>${log4j-version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
-	<dependencies>
-
-		<dependency>
-			<groupId>com.neptune.api.template</groupId>
-			<artifactId>template-server</artifactId>
-			<version>${apitemplate-version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.neptune.api.template</groupId>
-			<artifactId>template-storage</artifactId>
-			<version>${apitemplate-version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.neptune.delayedqueue</groupId>
-			<artifactId>delayedqueue</artifactId>
-			<version>${delayedqueue-version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>joda-time</groupId>
-			<artifactId>joda-time</artifactId>
-			<version>${joda-version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>4.5.2</version>
-		</dependency>
-
-		<!-- EJB Espec -->
-		<dependency>
-			<groupId>javax.ejb</groupId>
-			<artifactId>javax.ejb-api</artifactId>
-			<version>${ejb-spec-version}</version>
-		</dependency>
-
-
-		<!-- Linking language -->
-		<dependency>
-			<groupId>org.glassfish.web</groupId>
-			<artifactId>javax.el</artifactId>
-			<version>${linking-lang-version}</version>
-		</dependency>
-
-
-		<!-- !!Jersey Dependencies!! -->
-
-		<dependency>
-			<groupId>org.glassfish.jersey.core</groupId>
-			<artifactId>jersey-server</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.glassfish.jersey.containers</groupId>
-			<artifactId>jersey-container-servlet</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.glassfish.jersey.media</groupId>
-			<artifactId>jersey-media-json-jackson</artifactId>
-		</dependency>
-
-		<!-- Declarative Linking -->
-		<dependency>
-			<groupId>org.glassfish.jersey.ext</groupId>
-			<artifactId>jersey-declarative-linking</artifactId>
-		</dependency>
-
-		<!-- CDI for jersey -->
-		<dependency>
-			<groupId>org.glassfish.jersey.ext.cdi</groupId>
-			<artifactId>jersey-cdi1x</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.glassfish.jersey.ext.cdi</groupId>
-			<artifactId>jersey-cdi1x-servlet</artifactId>
-		</dependency>
-
-
-		<!-- !!Hibernate!! -->
-
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<version>${connector-version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-entitymanager</artifactId>
-			<version>${hibernate-version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-c3p0</artifactId>
-			<version>${hibernate-version}</version>
-		</dependency>
-
-
-		<!-- DI -->
-		<dependency>
-			<groupId>org.jboss.weld.servlet</groupId>
-			<artifactId>weld-servlet-core</artifactId>
-			<version>${weld-version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.jboss</groupId>
-			<artifactId>jandex</artifactId>
-			<version>${jandex-version}</version>
-		</dependency>
-
-		<!-- Tests -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${junit-version}</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
-			<version>2.0.94-beta</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>com.squareup.okhttp3</groupId>
-			<artifactId>okhttp</artifactId>
-			<version>3.4.1</version>
-			<scope>test</scope>
-		</dependency>
-
-		<!-- Logger -->
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-web</artifactId>
-			<version>${log4j-version}</version>
-		</dependency>
-
-	</dependencies>
-
-	<reporting>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>${project-info-plugin-version}</version>
-				<configuration>
-					<dependencyLocationsEnabled>false</dependencyLocationsEnabled>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-report-plugin</artifactId>
-				<version>${surefire-report-plugin-version}</version>
-				<reportSets>
-					<reportSet>
-						<id>integration-tests</id>
-						<reports>
-							<report>failsafe-report-only</report>
-						</reports>
-					</reportSet>
-				</reportSets>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>${javadoc-plugin-version}</version>
-				<configuration>
-					<show>private</show>
-					<nohelp>true</nohelp>
-				</configuration>
-				<reportSets>
-					<reportSet>
-						<id>default</id>
-						<reports>
-							<report>javadoc</report>
-						</reports>
-					</reportSet>
-					<reportSet>
-						<id>aggregate</id>
-						<reports>
-							<report>aggregate</report>
-						</reports>
-					</reportSet>
-				</reportSets>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-pmd-plugin</artifactId>
-				<version>${pmd-plugin-version}</version>
-				<configuration>
-					<minimumTokens>100</minimumTokens>
-					<linkXref>true</linkXref>
-					<excludes>
-						<exclude>**/*Bean.java</exclude>
-						<exclude>**/generated/*.java</exclude>
-					</excludes>
-					<excludeRoots>
-						<excludeRoot>target/generated-sources/stubs</excludeRoot>
-					</excludeRoots>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jxr-plugin</artifactId>
-				<version>${jxr-plugin-version}</version>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>${checkstyle-plugin-version}</version>
-				<configuration>
-					<linkXref>true</linkXref>
-				</configuration>
-				<reportSets>
-					<reportSet>
-						<reports>
-							<report>checkstyle</report>
-						</reports>
-					</reportSet>
-				</reportSets>
-			</plugin>
-
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>findbugs-maven-plugin</artifactId>
-				<version>${findbugs-plugin-version}</version>
-				<configuration>
-					<linkXref>true</linkXref>
-					<xmlOutput>true</xmlOutput>
-					<!-- Optional directory to put findbugs xdoc xml report -->
-					<xmlOutputDirectory>target/site</xmlOutputDirectory>
-				</configuration>
-			</plugin>
-
-		</plugins>
-	</reporting>
-
 	<build>
-		<finalName>${project.artifactId}</finalName>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-war-plugin</artifactId>
+					<version>2.6</version>
+				</plugin>
 
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<version>2.6</version>
-			</plugin>
-
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>${jacoco-plugin-version}</version>
-				<configuration>
-					<output>file</output>
-					<append>true</append>
-				</configuration>
-				<executions>
-					<execution>
-						<id>jacoco-initialize</id>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>jacoco-site</id>
-						<phase>verify</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<version>${dependency-plugin-version}</version>
-			</plugin>
-
-			<!-- compiler plugin -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>${compiler-plugin-version}</version>
-				<inherited>true</inherited>
-				<configuration>
-					<source>${java-version}</source>
-					<target>${java-version}</target>
-					<encoding>${project.build.sourceEncoding}</encoding>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>${surefire-report-plugin-version}</version>
-				<configuration>
-					<!-- Skips unit tests if the value of skip.unit.tests property is true -->
-					<skipTests>false</skipTests>
-					<!-- Excludes integration tests when unit tests are run -->
-					<excludes>
-						<exclude>**/*IntegrationTest*.java</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>2.19.1</version>
-				<configuration>
-					<includes>
-						<include>**/*IntegrationTest*</include>
-					</includes>
-				</configuration>
-				<executions>
-					<execution>
-						<id>integration-test</id>
-						<goals>
-							<goal>integration-test</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>verify</id>
-						<goals>
-							<goal>verify</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>org.codehaus.cargo</groupId>
-				<artifactId>cargo-maven2-plugin</artifactId>
-				<version>1.5.0</version>
-				<configuration>
-
-					<!-- Container configuration -->
-					<container>
-						<containerId>tomcat8x</containerId>
-						<type>remote</type>
-					</container>
-
-					<!-- Configuration to use with the container (which will also configure 
-						the deployer) -->
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>${jacoco-plugin-version}</version>
 					<configuration>
-						<type>runtime</type>
-						<properties>
-							<cargo.remote.uri>http://localhost:8080/manager/text</cargo.remote.uri>
-							<cargo.remote.username>rafael</cargo.remote.username>
-							<cargo.remote.password>rafael</cargo.remote.password>
-						</properties>
+						<output>file</output>
+						<append>true</append>
 					</configuration>
+					<executions>
+						<execution>
+							<id>jacoco-initialize</id>
+							<goals>
+								<goal>prepare-agent</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>jacoco-site</id>
+							<phase>verify</phase>
+							<goals>
+								<goal>report</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
 
-					<!-- Deployables configuration -->
-					<deployables>
-						<deployable>
-							<groupId>${project.groupId}</groupId>
-							<artifactId>${project.artifactId}</artifactId>
-							<type>war</type>
-						</deployable>
-					</deployables>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<version>${dependency-plugin-version}</version>
+				</plugin>
 
-				</configuration>
-				<executions>
-					<execution>
-						<id>start-tomcat</id>
-						<phase>pre-integration-test</phase>
-						<configuration>
-							<wait>false</wait>
-							<container>
-								<containerId>tomcat8x</containerId>
-								<zipUrlInstaller>
-									<url>http://archive.apache.org/dist/tomcat/tomcat-8/v8.0.23/bin/apache-tomcat-8.0.23.tar.gz</url>
-									<extractDir>${project.directory}/build/extract/</extractDir>
-									<downloadDir>${project.directory}/build/download/</downloadDir>
-								</zipUrlInstaller>
-								<output>${project.directory}/build/tomcat8x.log</output>
-								<log>${project.directory}/build/cargo.log</log>
-							</container>
-							<configuration>
-								<type>existing</type>
-								<home>${project.directory}/build/tomcat-8/container</home>
-								<properties>
-									<cargo.logging>high</cargo.logging>
-									<cargo.servlet.port>9080</cargo.servlet.port>
-									<cargo.tomcat.ajp.port>9008</cargo.tomcat.ajp.port>
-								</properties>
-							</configuration>
-						</configuration>
-						<goals>
-							<goal>start</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>stop-tomcat</id>
-						<phase>post-integration-test</phase>
-						<goals>
-							<goal>stop</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+				<!-- compiler plugin -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>${compiler-plugin-version}</version>
+					<inherited>true</inherited>
+					<configuration>
+						<source>${java-version}</source>
+						<target>${java-version}</target>
+						<encoding>${project.build.sourceEncoding}</encoding>
+					</configuration>
+				</plugin>
 
-		</plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>${surefire-report-plugin-version}</version>
+					<configuration>
+						<skipTests>false</skipTests>
+						<excludes>
+							<exclude>**/*IntegrationTest*.java</exclude>
+						</excludes>
+					</configuration>
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-failsafe-plugin</artifactId>
+					<version>2.19.1</version>
+					<configuration>
+						<includes>
+							<include>**/*IntegrationTest*</include>
+						</includes>
+					</configuration>
+					<executions>
+						<execution>
+							<id>integration-test</id>
+							<goals>
+								<goal>integration-test</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>verify</id>
+							<goals>
+								<goal>verify</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+
+				<plugin>
+					<groupId>org.codehaus.cargo</groupId>
+					<artifactId>cargo-maven2-plugin</artifactId>
+					<version>1.5.0</version>
+				</plugin>
+
+			</plugins>
+		</pluginManagement>
 
 	</build>
 </project>
