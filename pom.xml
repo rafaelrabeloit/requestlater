@@ -46,9 +46,9 @@
 			<id>profile-development</id>
 			<properties>
 				<environment>development</environment>
-				<tomcat.user>rafael</tomcat.user>
-				<tomcat.pass>rafael</tomcat.pass>
-				<tomcat.url>http://localhost:8080/manager/text</tomcat.url>
+				<deploy.user>rafael</deploy.user>
+				<deploy.pass>rafael</deploy.pass>
+				<deploy.url>http://localhost:8080/manager/text</deploy.url>
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -62,57 +62,72 @@
 
 	<properties>
 
+		<!-- CI, CD and IT -->
+		<container-name>tomcat</container-name>
+		<container-major>8</container-major>
+		
 		<!-- encoding -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
 		<!--java version -->
 		<java-version>1.8</java-version>
 
 		<!-- Build plugin versions -->
 		<compiler-plugin-version>3.5.1</compiler-plugin-version>
 		<dependency-plugin-version>2.10</dependency-plugin-version>
-
-		<ejb-plugin-version>2.3</ejb-plugin-version>
-		<war-plugin-version>2.4</war-plugin-version>
-		<maven-tomcat-plugin-version>2.2</maven-tomcat-plugin-version>
-		<resources-plugin-version>2.7</resources-plugin-version>
-
-		<!-- EJB spec version -->
-		<ejb-spec-version>3.2</ejb-spec-version>
+		<war-plugin-version>2.6</war-plugin-version>
+		<cargo-plugin-version>1.5.0</cargo-plugin-version>
+		<jacoco-plugin-version>0.7.7.201606060606</jacoco-plugin-version>
+		<surefire-plugin-version>2.19.1</surefire-plugin-version>
+		<failsafe-plugin-version>2.19.1</failsafe-plugin-version>
 
 		<!-- Report plugin versions -->
 		<project-info-plugin-version>2.9</project-info-plugin-version>
-		<jacoco-plugin-version>0.7.7.201606060606</jacoco-plugin-version>
-		<surefire-report-plugin-version>2.19.1</surefire-report-plugin-version>
 		<javadoc-plugin-version>2.10.4</javadoc-plugin-version>
 		<javancss-plugin-version>2.1</javancss-plugin-version>
 		<pmd-plugin-version>3.6</pmd-plugin-version>
 		<jxr-plugin-version>2.5</jxr-plugin-version>
 		<checkstyle-plugin-version>2.17</checkstyle-plugin-version>
 		<findbugs-plugin-version>3.0.4</findbugs-plugin-version>
+		<surefire-report-plugin-version>2.19.1</surefire-report-plugin-version>
 
+		<!-- Dependency versions -->
+		<!-- jax-rs -->
 		<jersey-version>2.23.1</jersey-version>
-		<hibernate-version>5.2.2.Final</hibernate-version>
 
-		<linking-lang-version>2.2.4</linking-lang-version>
-		<validation-version>1.1.0.Final</validation-version>
-
+		<!-- cdi -->
 		<cdi-version>1.2</cdi-version>
 		<weld-version>2.3.5.Final</weld-version>
 		<jandex-version>2.0.3.Final</jandex-version>
 
-		<connector-version>5.1.35</connector-version>
+		<!-- db -->
+		<hibernate-version>5.2.2.Final</hibernate-version>
+		<mysql-version>5.1.35</mysql-version>
+		<h2-version>1.4.192</h2-version>
 
-		<joda-version>2.8.1</joda-version>
-
-		<jsoup-version>1.8.2</jsoup-version>
-
+		<!-- log -->
 		<log4j-version>2.3</log4j-version>
 
+		<!-- test -->
 		<junit-version>4.11</junit-version>
+		<mockito-version>2.0.94-beta</mockito-version>
 
+		<!--TODO: choose one! -->
+		<httpclient-version>4.5.2</httpclient-version>
+		<okhttp-version>3.4.1</okhttp-version>
+		
+		<!--TODO: to change this -->
+		<joda-version>2.8.1</joda-version>
+		<jsoup-version>1.8.2</jsoup-version>
+		
+		<linking-lang-version>2.2.4</linking-lang-version>
+		<validation-version>1.1.0.Final</validation-version>
+
+		<!-- local dependencies -->
 		<apitemplate-version>0.0.1-SNAPSHOT</apitemplate-version>
 		<delayedqueue-version>0.0.1-SNAPSHOT</delayedqueue-version>
+		
 	</properties>
 
 	<dependencyManagement>
@@ -127,6 +142,7 @@
 				<scope>import</scope>
 			</dependency>
 
+			<!-- Local -->
 			<dependency>
 				<groupId>com.neptune.api.template</groupId>
 				<artifactId>template-server</artifactId>
@@ -145,6 +161,7 @@
 				<version>${delayedqueue-version}</version>
 			</dependency>
 
+
 			<dependency>
 				<groupId>joda-time</groupId>
 				<artifactId>joda-time</artifactId>
@@ -154,14 +171,7 @@
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient</artifactId>
-				<version>4.5.2</version>
-			</dependency>
-
-			<!-- EJB Espec -->
-			<dependency>
-				<groupId>javax.ejb</groupId>
-				<artifactId>javax.ejb-api</artifactId>
-				<version>${ejb-spec-version}</version>
+				<version>${httpclient-version}</version>
 			</dependency>
 
 
@@ -178,7 +188,13 @@
 			<dependency>
 				<groupId>mysql</groupId>
 				<artifactId>mysql-connector-java</artifactId>
-				<version>${connector-version}</version>
+				<version>${mysql-version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.h2database</groupId>
+				<artifactId>h2</artifactId>
+				<version>${h2-version}</version>
 			</dependency>
 
 			<dependency>
@@ -218,28 +234,28 @@
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
-				<version>2.0.94-beta</version>
+				<version>${mockito-version}</version>
 				<scope>test</scope>
 			</dependency>
 
 			<dependency>
 				<groupId>com.squareup.okhttp3</groupId>
 				<artifactId>okhttp</artifactId>
-				<version>3.4.1</version>
+				<version>${okhttp-version}</version>
 				<scope>test</scope>
 			</dependency>
 
-			<!-- Logger -->
-			<dependency>
-				<groupId>org.apache.logging.log4j</groupId>
-				<artifactId>log4j-web</artifactId>
-				<version>${log4j-version}</version>
-			</dependency>
-
-			<!-- Logger -->
+			<!-- Logger Core -->
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
 				<artifactId>log4j-core</artifactId>
+				<version>${log4j-version}</version>
+			</dependency>
+			
+			<!-- Logger Web -->
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-web</artifactId>
 				<version>${log4j-version}</version>
 			</dependency>
 		</dependencies>
@@ -251,7 +267,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-war-plugin</artifactId>
-					<version>2.6</version>
+					<version>${war-plugin-version}</version>
 				</plugin>
 
 				<plugin>
@@ -301,7 +317,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>${surefire-report-plugin-version}</version>
+					<version>${surefire-plugin-version}</version>
 					<configuration>
 						<skipTests>false</skipTests>
 						<excludes>
@@ -313,7 +329,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>2.19.1</version>
+					<version>${failsafe-plugin-version}</version>
 					<configuration>
 						<includes>
 							<include>**/*IntegrationTest*</include>
@@ -338,7 +354,7 @@
 				<plugin>
 					<groupId>org.codehaus.cargo</groupId>
 					<artifactId>cargo-maven2-plugin</artifactId>
-					<version>1.5.0</version>
+					<version>${cargo-plugin-version}</version>
 				</plugin>
 
 			</plugins>

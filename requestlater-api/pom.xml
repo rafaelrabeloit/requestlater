@@ -262,24 +262,20 @@
 				<artifactId>cargo-maven2-plugin</artifactId>
 				<configuration>
 
-					<!-- Container configuration -->
 					<container>
-						<containerId>tomcat8x</containerId>
+						<containerId>${container-name}${container-major}x</containerId>
 						<type>remote</type>
 					</container>
 
-					<!-- Configuration to use with the container (which will also configure 
-						the deployer) -->
 					<configuration>
 						<type>runtime</type>
 						<properties>
-							<cargo.remote.uri>http://localhost:8080/manager/text</cargo.remote.uri>
-							<cargo.remote.username>rafael</cargo.remote.username>
-							<cargo.remote.password>rafael</cargo.remote.password>
+							<cargo.remote.uri>${deploy.url}</cargo.remote.uri>
+							<cargo.remote.username>${deploy.user}</cargo.remote.username>
+							<cargo.remote.password>${deploy.pass}</cargo.remote.password>
 						</properties>
 					</configuration>
 
-					<!-- Deployables configuration -->
 					<deployables>
 						<deployable>
 							<groupId>${project.groupId}</groupId>

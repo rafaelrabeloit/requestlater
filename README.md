@@ -26,5 +26,6 @@ My ultimate motive is that it was fun to do. :)
 
 test & deploy
 -------------
-Use mvn cargo:redeploy to execute cargo deployment system
-Use mvn verify to run integration tests
+Use mvn cargo:redeploy to execute cargo deployment system  
+Use mvn verify to run integration tests  
+Use mvn clean site install && mvn cargo:redeploy -pl requestlater-api

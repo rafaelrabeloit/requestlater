@@ -10,18 +10,38 @@
 
 	<artifactId>requestlater-it</artifactId>
 
-	<packaging>jar</packaging>
+	<packaging>war</packaging>
+
+	<properties>
+		<!-- You can change the container with container-name and container-major -->
+		<!-- <container-name>jetty</container-name> -->
+
+		<!-- container exact version, for IT -->
+		<container-version>${container-major}.0.23</container-version>
+		<!-- download URL -->
+		<container-download-url>http://archive.apache.org/dist/${container-name}/${container-name}-${container-major}/v${container-version}/bin/apache-${container-name}-${container-version}.tar.gz</container-download-url>
+
+		<!-- testing artifact -->
+		<testing-artifactId>requestlater-api</testing-artifactId>
+	</properties>
 
 	<dependencies>
 
-		<!-- Tests -->
+		<!-- Package to be tested -->
 		<dependency>
-			<groupId>com.neptune.api.requestlater</groupId>
-			<artifactId>requestlater-api</artifactId>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>${testing-artifactId}</artifactId>
 			<version>${project.version}</version>
 			<type>war</type>
 		</dependency>
-		
+
+		<!-- H2 test database (see persistence.xml) -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+		</dependency>
+
+
 		<!-- Tests -->
 		<dependency>
 			<groupId>junit</groupId>
@@ -35,20 +55,29 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- Logger -->
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 	</dependencies>
 
 	<reporting>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>${project-info-plugin-version}</version>
+				<configuration>
+					<dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+				</configuration>
+			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-report-plugin</artifactId>
+				<version>${surefire-report-plugin-version}</version>
 				<reportSets>
 					<reportSet>
 						<id>integration-tests</id>
@@ -58,29 +87,26 @@
 					</reportSet>
 				</reportSets>
 			</plugin>
-
 		</plugins>
 	</reporting>
 
 	<build>
 
 		<plugins>
+			<!-- it will ensure WAR merge :) -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 			</plugin>
 
-			<!-- compiler plugin -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<inherited>true</inherited>
-				<configuration>
-					<source>${java-version}</source>
-					<target>${java-version}</target>
-					<encoding>${project.build.sourceEncoding}</encoding>
-				</configuration>
 			</plugin>
 
 			<plugin>
@@ -118,17 +144,25 @@
 				<configuration>
 					<wait>false</wait>
 					<container>
-						<containerId>tomcat8x</containerId>
+						<containerId>${container-name}${container-major}x</containerId>
 						<zipUrlInstaller>
-							<url>http://archive.apache.org/dist/tomcat/tomcat-8/v8.0.23/bin/apache-tomcat-8.0.23.tar.gz</url>
-							<extractDir>${basedir}/build/extract/</extractDir>
-							<downloadDir>${basedir}/build/download/</downloadDir>
+							<url>${container-download-url}</url>
+							<extractDir>${project.basedir}/build/extract/</extractDir>
+							<downloadDir>${project.basedir}/build/download/</downloadDir>
 						</zipUrlInstaller>
-						<output>${basedir}/build/tomcat8x.log</output>
-						<log>${basedir}/build/cargo.log</log>
+						<output>${project.build.directory}/${container-name}${container-major}x.log</output>
+						<log>${project.build.directory}/cargo.log</log>
+
+						<dependencies>
+							<dependency>
+								<groupId>com.h2database</groupId>
+								<artifactId>h2</artifactId>
+							</dependency>
+						</dependencies>
 					</container>
+
 					<configuration>
-						<home>${basedir}/build/tomcat-8/container</home>
+						<home>${project.basedir}/build/${container-name}-${container-major}/container</home>
 						<properties>
 							<cargo.logging>high</cargo.logging>
 							<cargo.servlet.port>9080</cargo.servlet.port>
@@ -139,23 +173,24 @@
 					<!-- Deployables configuration -->
 					<deployables>
 						<deployable>
-							<groupId>${project.groupId}</groupId>
-							<artifactId>requestlater-api</artifactId>
-							<type>war</type>
+							<properties>
+								<!-- This changes the context to the original value -->
+								<context>${testing-artifactId}</context>
+							</properties>
 						</deployable>
 					</deployables>
 
 				</configuration>
 				<executions>
 					<execution>
-						<id>start-tomcat</id>
+						<id>start-container</id>
 						<phase>pre-integration-test</phase>
 						<goals>
 							<goal>start</goal>
 						</goals>
 					</execution>
 					<execution>
-						<id>stop-tomcat</id>
+						<id>stop-container</id>
 						<phase>post-integration-test</phase>
 						<goals>
 							<goal>stop</goal>
