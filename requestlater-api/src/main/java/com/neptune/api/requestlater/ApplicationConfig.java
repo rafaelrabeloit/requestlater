@@ -30,6 +30,7 @@ public class ApplicationConfig extends ResourceConfig {
                 // .register(BasicAuthFilter.class)
                 .register(DeclarativeLinkingFeature.class)
                 .register(JacksonFeature.class)
+//                .register(JacksonContextResolver.class)
                 .setApplicationName("RequestLater");
     }
 }

@@ -148,14 +148,14 @@ public class Request extends DomainTemplate {
         return this.schedule;
     }
 
+    @Column(name = "schedule_id", columnDefinition = "binary(16)", insertable = false, updatable = false)
+    public UUID getScheduleId() {
+        return this.scheduleId;
+    }
+
     @Column(name = "target_uri")
     public String getTargetUri() {
         return this.targetUri;
-    }
-
-    @Column(name = "schedule_id", insertable = false, updatable = false)
-    public UUID getScheduleId() {
-        return this.scheduleId;
     }
 
     /**
@@ -173,7 +173,7 @@ public class Request extends DomainTemplate {
             resp.peel(response);
 
             logger.debug("HTTPRequest completed, with response: " + resp);
-            
+
             // JPA ensures that this will persist() when update
             // Memory Storage will handle this in DAO
             this.getResponses().add(resp);
@@ -225,9 +225,8 @@ public class Request extends DomainTemplate {
     public String toString() {
         return "Request [content=" + content + ", createdOn="
                 + this.getCreatedOn() + ", headers=" + headers + ", id="
-                + this.getId() + ", method=" + method + ", responses="
-                + responses + ", scheduleId=" + scheduleId + ", targetUri="
-                + targetUri + "]";
+                + this.getId() + ", method=" + method + ", scheduleId="
+                + scheduleId + ", targetUri=" + targetUri + "]";
     }
 
 }

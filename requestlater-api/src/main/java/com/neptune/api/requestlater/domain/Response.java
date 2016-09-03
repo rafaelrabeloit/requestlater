@@ -98,6 +98,11 @@ public class Response extends DomainTemplate {
         return request;
     }
 
+    @Column(name = "request_id", columnDefinition = "binary(16)", insertable = false, updatable = false)
+    public UUID getRequestId() {
+        return this.requestId;
+    }
+
     @Column(name = "status_code")
     public Integer getStatusCode() {
         return this.statusCode;
@@ -108,14 +113,11 @@ public class Response extends DomainTemplate {
         return this.content;
     }
 
-    @Column(name = "request_id", insertable = false, updatable = false)
-    public UUID getRequestId() {
-        return this.requestId;
-    }
-
     /**
      * Populate this instance of response with parameters of a HTTPResponse.
-     * @param response HTTPResponse instance to copy from
+     * 
+     * @param response
+     *            HTTPResponse instance to copy from
      */
     public void peel(HttpResponse response) {
         HttpEntity entity = response.getEntity();

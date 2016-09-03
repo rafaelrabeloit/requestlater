@@ -6,7 +6,6 @@ import com.neptune.api.requestlater.dao.ResponseDAO;
 import com.neptune.api.requestlater.domain.Response;
 import com.neptune.api.template.service.ServiceTemplateImpl;
 import com.neptune.api.template.storage.JPAStorage;
-import com.neptune.api.template.storage.MemoryStorage;
 
 public class ResponseServiceImpl extends ServiceTemplateImpl<Response>
         implements ResponseService {

@@ -65,7 +65,7 @@
 		<!-- CI, CD and IT -->
 		<container-name>tomcat</container-name>
 		<container-major>8</container-major>
-		
+
 		<!-- encoding -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -116,18 +116,20 @@
 		<!--TODO: choose one! -->
 		<httpclient-version>4.5.2</httpclient-version>
 		<okhttp-version>3.4.1</okhttp-version>
-		
+
 		<!--TODO: to change this -->
 		<joda-version>2.8.1</joda-version>
+		<jackson-joda-datatype-version>2.4.0</jackson-joda-datatype-version>
+		<jackson-version>2.8.1</jackson-version>
 		<jsoup-version>1.8.2</jsoup-version>
-		
+
 		<linking-lang-version>2.2.4</linking-lang-version>
 		<validation-version>1.1.0.Final</validation-version>
 
 		<!-- local dependencies -->
 		<apitemplate-version>0.0.1-SNAPSHOT</apitemplate-version>
 		<delayedqueue-version>0.0.1-SNAPSHOT</delayedqueue-version>
-		
+
 	</properties>
 
 	<dependencyManagement>
@@ -182,6 +184,18 @@
 				<version>${linking-lang-version}</version>
 			</dependency>
 
+			<!-- Jackson Databind for Serialization config -->
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>${jackson-version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.fasterxml.jackson.datatype</groupId>
+				<artifactId>jackson-datatype-joda</artifactId>
+				<version>${jackson-joda-datatype-version}</version>
+			</dependency>
 
 			<!-- !!Hibernate!! -->
 
@@ -251,7 +265,7 @@
 				<artifactId>log4j-core</artifactId>
 				<version>${log4j-version}</version>
 			</dependency>
-			
+
 			<!-- Logger Web -->
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
@@ -260,6 +274,19 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>${project-info-plugin-version}</version>
+				<configuration>
+					<dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+				</configuration>
+			</plugin>
+		</plugins>
+	</reporting>
 
 	<build>
 		<pluginManagement>

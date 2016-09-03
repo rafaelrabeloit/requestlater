@@ -16,12 +16,20 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
+import javax.ws.rs.core.Link;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.glassfish.jersey.linking.InjectLink;
+import org.glassfish.jersey.linking.InjectLinkNoFollow;
+import org.glassfish.jersey.linking.InjectLinks;
 
+import com.neptune.api.template.adapter.LinkAdapter;
 import com.neptune.api.template.domain.DomainTemplate;
 
 /**
@@ -43,7 +51,14 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
 
     private Date atTime;
 
+    @InjectLinkNoFollow
     private List<Request> requests;
+
+    @InjectLinks({
+            @InjectLink(value = "schedules/${instance.id}", rel = "self"),
+            @InjectLink(value = "schedules/${instance.id}/requests", rel = "requests") })
+    @XmlJavaTypeAdapter(LinkAdapter.class)
+    private List<Link> links;
 
     public Schedule() {
         super();
@@ -61,6 +76,19 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
     @Column(name = "at_time")
     public Date getAtTime() {
         return atTime;
+    }
+
+    @Transient
+    @XmlElement(name = "_links")
+    public List<Link> getLinks() {
+        return links;
+    }
+
+    @Override
+    @XmlTransient
+    public long getDelay(TimeUnit unit) {
+        return unit.convert(atTime.getTime() - System.currentTimeMillis(),
+                MILLISECONDS);
     }
 
     @OneToMany(mappedBy = "schedule", targetEntity = Request.class, fetch = FetchType.LAZY)
@@ -87,12 +115,6 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
     }
 
     @Override
-    public long getDelay(TimeUnit unit) {
-        return unit.convert(atTime.getTime() - System.currentTimeMillis(),
-                MILLISECONDS);
-    }
-
-    @Override
     public void run() {
         logger.debug("Firing Schedule(" + this.getId() + ")");
 
@@ -107,8 +129,7 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
     @Override
     public String toString() {
         return "Schedule [id=" + this.getId() + ", createdOn="
-                + this.getCreatedOn() + ", at=" + atTime + ", requests="
-                + requests + "]";
+                + this.getCreatedOn() + ", at=" + atTime + "]";
     }
 
     @Override

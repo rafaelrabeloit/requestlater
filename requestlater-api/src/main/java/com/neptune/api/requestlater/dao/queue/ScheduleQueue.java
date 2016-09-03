@@ -32,6 +32,10 @@ public class ScheduleQueue extends DAOTemplateImpl<Schedule>
         queue = new DelayedQueue<>();
     }
 
+    public void stop() {
+        this.queue.stop();
+    }
+    
     public void setOnTimeListener(OnTimeListener<Schedule> listener) {
         this.queue.setOnTimeListener(listener);
     }
