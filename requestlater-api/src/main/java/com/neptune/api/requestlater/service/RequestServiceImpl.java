@@ -6,7 +6,7 @@ import com.neptune.api.requestlater.dao.RequestDAO;
 import com.neptune.api.requestlater.dao.ScheduleDAO;
 import com.neptune.api.requestlater.domain.Request;
 import com.neptune.api.template.service.ServiceTemplateImpl;
-import com.neptune.api.template.storage.JPAStorage;
+import com.neptune.api.template.storage.jpa.JPAStorage;
 
 public class RequestServiceImpl extends ServiceTemplateImpl<Request>
         implements RequestService {

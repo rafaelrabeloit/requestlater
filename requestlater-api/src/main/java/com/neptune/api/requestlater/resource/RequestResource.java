@@ -15,7 +15,7 @@ import com.neptune.api.template.dao.Filtering;
 import com.neptune.api.template.resource.ResourceRegex;
 import com.neptune.api.template.resource.ResourceTemplate;
 
-@Path("/schedules/{scheduleId: " + ResourceRegex.UUID + "}/requests")
+@Path("/schedules/{scheduleId: " + ResourceRegex.UUID + "}/requests/")
 public class RequestResource extends ResourceTemplate<Request> {
 
     @Inject
@@ -27,7 +27,7 @@ public class RequestResource extends ResourceTemplate<Request> {
     @PostConstruct
     public void setFilters() {
         service.getDAO().getFilters().add(new Filtering(
-                Filtering.Operation.EQUAL, "scheduleId", scheduleId));
+                Filtering.Operation.EQUAL, "scheduleId", UUID.fromString(scheduleId)));
     }
 
     @Override

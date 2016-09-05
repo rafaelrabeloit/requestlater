@@ -7,6 +7,9 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.core.GenericEntity;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.neptune.api.requestlater.dao.ScheduleDAO;
 import com.neptune.api.requestlater.domain.Schedule;
 import com.neptune.api.template.dao.DAOTemplateImpl;
@@ -20,6 +23,8 @@ import com.neptune.queue.DelayedQueue.OnTimeListener;
 @Singleton
 public class ScheduleQueue extends DAOTemplateImpl<Schedule>
         implements ScheduleDAO {
+    final static Logger logger = LogManager
+            .getLogger(ScheduleQueue.class);
 
     /**
      * Queue used for this elements
@@ -33,7 +38,11 @@ public class ScheduleQueue extends DAOTemplateImpl<Schedule>
     }
 
     public void stop() {
-        this.queue.stop();
+        try {
+            this.queue.stop();
+        } catch (InterruptedException e) {
+            logger.error("Queue Stop was Interrupted!", e);
+        }
     }
     
     public void setOnTimeListener(OnTimeListener<Schedule> listener) {

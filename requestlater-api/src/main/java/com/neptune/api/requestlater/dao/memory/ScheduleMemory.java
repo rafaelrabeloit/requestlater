@@ -8,8 +8,8 @@ import com.neptune.api.requestlater.dao.RequestDAO;
 import com.neptune.api.requestlater.dao.ScheduleDAO;
 import com.neptune.api.requestlater.domain.Request;
 import com.neptune.api.requestlater.domain.Schedule;
-import com.neptune.api.template.storage.MemoryStorage;
-import com.neptune.api.template.storage.StorageTemplateMemory;
+import com.neptune.api.template.storage.memory.MemoryStorage;
+import com.neptune.api.template.storage.memory.StorageTemplateMemory;
 
 @MemoryStorage
 public class ScheduleMemory extends StorageTemplateMemory<Schedule>

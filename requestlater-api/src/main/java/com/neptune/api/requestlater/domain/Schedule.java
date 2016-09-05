@@ -9,6 +9,7 @@ import java.util.UUID;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -29,6 +30,7 @@ import org.glassfish.jersey.linking.InjectLink;
 import org.glassfish.jersey.linking.InjectLinkNoFollow;
 import org.glassfish.jersey.linking.InjectLinks;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.neptune.api.template.adapter.LinkAdapter;
 import com.neptune.api.template.domain.DomainTemplate;
 
@@ -91,8 +93,9 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
                 MILLISECONDS);
     }
 
-    @OneToMany(mappedBy = "schedule", targetEntity = Request.class, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "schedule", targetEntity = Request.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @XmlTransient
+    @JsonIgnore
     public List<Request> getRequests() {
         return this.requests;
     }
@@ -116,11 +119,12 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
 
     @Override
     public void run() {
-        logger.debug("Firing Schedule(" + this.getId() + ")");
+        logger.debug("Firing " + this);
 
-        // In JPA, this will be Lazy Loading, and the data will load accordingly
+        // In JPA, this will be Lazy Load, and the data will load accordingly
         // In Memory Storage, requests is ensured to be always referenced
         // correctly
+        logger.debug("Running Requests: " + this.getRequests());
         for (Request req : this.getRequests()) {
             req.process();
         }

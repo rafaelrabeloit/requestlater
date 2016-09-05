@@ -9,7 +9,7 @@ import com.neptune.api.requestlater.dao.ScheduleDAO;
 import com.neptune.api.requestlater.dao.queue.QueueStorage;
 import com.neptune.api.requestlater.domain.Schedule;
 import com.neptune.api.template.service.ServiceTemplateImpl;
-import com.neptune.api.template.storage.JPAStorage;
+import com.neptune.api.template.storage.jpa.JPAStorage;
 
 public class ScheduleServiceImpl extends ServiceTemplateImpl<Schedule>
         implements ScheduleService {

@@ -2,6 +2,7 @@ package com.neptune.api.requestlater.domain;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -9,11 +10,16 @@ import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.ws.rs.core.Link;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -22,7 +28,11 @@ import org.apache.http.ParseException;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.glassfish.jersey.linking.InjectLink;
+import org.glassfish.jersey.linking.InjectLinkNoFollow;
+import org.glassfish.jersey.linking.InjectLinks;
 
+import com.neptune.api.template.adapter.LinkAdapter;
 import com.neptune.api.template.domain.DomainTemplate;
 
 /**
@@ -45,17 +55,20 @@ public class Response extends DomainTemplate {
     private Map<String, String> headers;
 
     private String locale;
-
     private String protocolVersion;
-
     private String reasonPhrase;
+    private Integer statusCode;
+    private String content;
 
+    @InjectLinkNoFollow
     private Request request;
     private UUID requestId;
 
-    private Integer statusCode;
-
-    private String content;
+    @InjectLinks({
+            @InjectLink(value = "requests/${instance.requestId}/responses/${instance.id}", rel = "self"),
+            @InjectLink(value = "requests/${instance.requestId}/responses", rel = "responses") })
+    @XmlJavaTypeAdapter(LinkAdapter.class)
+    private List<Link> links;
 
     public Response() {
         super();
@@ -69,7 +82,13 @@ public class Response extends DomainTemplate {
         this.setId(id);
     }
 
-    @ElementCollection
+    @Transient
+    @XmlElement(name = "_links")
+    public List<Link> getLinks() {
+        return links;
+    }
+
+    @ElementCollection(fetch = FetchType.EAGER)
     @Column(name = "value")
     @CollectionTable(name = "_response_headers", joinColumns = @JoinColumn(name = "response_id"))
     public Map<String, String> getHeaders() {
@@ -108,7 +127,7 @@ public class Response extends DomainTemplate {
         return this.statusCode;
     }
 
-    @Column
+    @Column(length = 1024 * 128)
     public String getContent() {
         return this.content;
     }
@@ -177,11 +196,16 @@ public class Response extends DomainTemplate {
 
     @Override
     public String toString() {
+        String tmpContent = (content == null ? content
+                : content.replaceAll(" ", "").replaceAll("\\t", ""));
+        tmpContent = (tmpContent != null && tmpContent.length() > 255
+                ? tmpContent.substring(0, 255) + "(...)" : tmpContent);
+
         return "Response [createdOn=" + this.getCreatedOn() + ", headers="
                 + headers + ", id=" + this.getId() + ", locale=" + locale
                 + ", protocolVersion=" + protocolVersion + ", reasonPhrase="
                 + reasonPhrase + ", requestId=" + requestId + ", statusCode="
-                + statusCode + ", content=" + content + "]";
+                + statusCode + ", content='" + tmpContent + "')]";
     }
 
 }

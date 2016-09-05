@@ -8,8 +8,8 @@ import com.neptune.api.requestlater.dao.RequestDAO;
 import com.neptune.api.requestlater.dao.ResponseDAO;
 import com.neptune.api.requestlater.domain.Request;
 import com.neptune.api.requestlater.domain.Response;
-import com.neptune.api.template.storage.MemoryStorage;
-import com.neptune.api.template.storage.StorageTemplateMemory;
+import com.neptune.api.template.storage.memory.MemoryStorage;
+import com.neptune.api.template.storage.memory.StorageTemplateMemory;
 
 @MemoryStorage
 public class RequestMemory extends StorageTemplateMemory<Request>

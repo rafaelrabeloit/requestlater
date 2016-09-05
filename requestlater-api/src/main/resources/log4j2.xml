@@ -12,5 +12,11 @@
 		<Root level="debug">
 			<AppenderRef ref="Console" />
 		</Root>
+<!-- 		<Logger name="com.neptune" level="debug" additivity="false"> -->
+<!-- 			<AppenderRef ref="Console" /> -->
+<!-- 		</Logger> -->
+<!-- 		<Logger name="org.hibernate" level="debug" additivity="false"> -->
+<!-- 			<AppenderRef ref="Console" /> -->
+<!-- 		</Logger> -->
 	</Loggers>
 </Configuration>
