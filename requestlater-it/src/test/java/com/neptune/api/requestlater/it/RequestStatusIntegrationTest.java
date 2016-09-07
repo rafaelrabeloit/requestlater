@@ -76,20 +76,10 @@ public class RequestStatusIntegrationTest extends TestCase {
 
         request = new Request.Builder().url(baseURL)
                 .post(RequestBody.create(MediaType.parse("application/json"),
-                        "                                                                                                                                                   "
-                                + "{                                                                                                                                        "
-                                + "    \"targetUri\": \"https://wwwss.shopinvest.com.br/infofundos/fundos/ConteudoTabelaRentabilidade.do?cdSgmtoProdt=1\",                  "
-                                + "    \"method\": \"GET\",                                                                                                                 "
-                                + "    \"headers\": {                                                                                                                       "
-                                + "        \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\",                                      "
-                                + "        \"Accept-Encoding\": \"gzip, deflate, sdch, br\",                                                                                "
-                                + "        \"Accept-Language\": \"pt-BR,pt;q=0.8,en-US;q=0.6,en;q=0.4\",                                                                    "
-                                + "        \"Cache-Control\": \"max-age=0\",                                                                                                "
-                                + "        \"Referer\": \"https://wwwss.shopinvest.com.br/infofundos/fundos/TabelaRentabilidade.do?cdSgmtoProdt=1\",                        "
-                                + "        \"Upgrade-Insecure-Requests\": \"1\",                                                                                            "
-                                + "        \"User-Agent\": \"Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36\""
-                                + "    }                                                                                                                                    "
-                                + "}                                                                                                                                        "))
+                        "                                                  "
+                                + "{                                       "
+                                + "    \"targetUri\": \"http://localhost/\""
+                                + "}                                       "))
                 .build();
         response = client.newCall(request).execute();
 
@@ -133,6 +123,12 @@ public class RequestStatusIntegrationTest extends TestCase {
         response = client.newCall(request).execute();
         assertEquals("Arbitrary Id in '" + testingElement + "' is visible!.",
                 404, response.code());
+
+        // Remove schedule
+        baseURL = BaseTestConfig.getBaseUrlBuilder().addPathSegment("schedules")
+                .addPathSegment(scheduleId).build();
+        request = new Request.Builder().url(baseURL).delete().build();
+        response = client.newCall(request).execute();
     }
 
 }

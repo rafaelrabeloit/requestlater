@@ -1,5 +1,7 @@
 package com.neptune.api.requestlater.service;
 
+import java.util.NoSuchElementException;
+
 import javax.inject.Inject;
 
 import org.apache.logging.log4j.LogManager;
@@ -32,21 +34,27 @@ public class ScheduleServiceImpl extends ServiceTemplateImpl<Schedule>
 
     @Override
     public Schedule create(Schedule entity) {
-        // TODO: maybe I should change the order here so when OnTime will have a
-        // sync object
         queue.create(entity);
         return super.create(entity);
     }
 
     @Override
     public Schedule update(Schedule entity) {
-        queue.update(entity);
+        try {
+            queue.update(entity);
+        } catch (NoSuchElementException e) {
+            logger.debug("Element " + entity + " is not on queue");
+        }
         return super.update(entity);
     }
 
     @Override
     public Schedule delete(Schedule entity) {
-        queue.delete(entity);
+        try {
+            queue.delete(entity);
+        } catch (NoSuchElementException e) {
+            logger.debug("Element " + entity + " is not on queue");
+        }
         return super.delete(entity);
     }
 

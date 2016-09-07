@@ -27,7 +27,7 @@ public class ResponseJPA extends StorageTemplateJPA<Response>
         super();
 
         //
-        this.getOrders().add(new Ordering(Direction.ASC, "createdOn"));
+        this.getOrders().add(new Ordering(Direction.DESC, "createdOn"));
     }
 
     @Override

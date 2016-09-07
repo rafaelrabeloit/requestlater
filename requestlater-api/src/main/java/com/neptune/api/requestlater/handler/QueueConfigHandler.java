@@ -30,7 +30,6 @@ public class QueueConfigHandler implements ApplicationEventListener {
 
     ScheduleJPA schedules = new ScheduleJPA();
 
-    @Override
     public void onEvent(ApplicationEvent event) {
         switch (event.getType()) {
         case INITIALIZATION_FINISHED:
@@ -71,4 +70,5 @@ public class QueueConfigHandler implements ApplicationEventListener {
     public RequestEventListener onRequest(RequestEvent requestEvent) {
         return null;
     }
+
 }

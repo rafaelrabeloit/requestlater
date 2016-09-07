@@ -53,7 +53,7 @@ import com.neptune.api.template.domain.DomainTemplate;
 @Entity
 @Table(name = "_requests")
 @XmlRootElement
-public class Request extends DomainTemplate {
+public class Request extends DomainTemplate implements Comparable<Request> {
 
     /**
      * 
@@ -66,6 +66,7 @@ public class Request extends DomainTemplate {
     private HttpMethods method;
     private String targetUri;
     private String content;
+    private Integer priority;
 
     @InjectLinkNoFollow
     private List<Response> responses;
@@ -87,6 +88,8 @@ public class Request extends DomainTemplate {
 
         this.headers = new HashMap<String, String>();
         this.responses = new LinkedList<Response>();
+        
+        this.method = HttpMethods.GET;
     }
 
     public Request(UUID id) {
@@ -101,7 +104,7 @@ public class Request extends DomainTemplate {
         return links;
     }
 
-    @Column(length = 1024 * 128)
+    @Column(length = 1024 * 128, nullable = true)
     public String getContent() {
         return content;
     }
@@ -139,6 +142,61 @@ public class Request extends DomainTemplate {
     @Column(name = "target_uri")
     public String getTargetUri() {
         return this.targetUri;
+    }
+
+    @Column
+    public Integer getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Integer priority) {
+        this.priority = priority;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public void setHeaders(Map<String, String> headers) {
+        this.headers = headers;
+    }
+
+    public void setMethod(HttpMethods method) {
+        this.method = method;
+    }
+
+    public void setResponses(List<Response> responses) {
+        this.responses = responses;
+    }
+
+    public void setSchedule(Schedule schedule) {
+        this.schedule = schedule;
+    }
+
+    public void setTargetUri(String targetUri) {
+        this.targetUri = targetUri;
+    }
+
+    public void setScheduleId(UUID scheduleId) {
+        this.scheduleId = scheduleId;
+    }
+
+    @Override
+    public int compareTo(Request o) {
+        return this.getPriority().compareTo(o.getPriority());
+    }
+    
+    @Override
+    public String toString() {
+        String tmpContent = (content == null ? content
+                : content.replaceAll(" ", "").replaceAll("\\t", ""));
+        tmpContent = (tmpContent != null && tmpContent.length() > 255
+                ? tmpContent.substring(0, 255) + "(...)" : tmpContent);
+
+        return "Request [content=" + tmpContent + ", createdOn="
+                + this.getCreatedOn() + ", headers=" + headers + ", id="
+                + this.getId() + ", method=" + method + ", scheduleId="
+                + scheduleId + ", targetUri=" + targetUri + "]";
     }
 
     /**
@@ -216,47 +274,6 @@ public class Request extends DomainTemplate {
         });
 
         return ret;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public void setHeaders(Map<String, String> headers) {
-        this.headers = headers;
-    }
-
-    public void setMethod(HttpMethods method) {
-        this.method = method;
-    }
-
-    public void setResponses(List<Response> responses) {
-        this.responses = responses;
-    }
-
-    public void setSchedule(Schedule schedule) {
-        this.schedule = schedule;
-    }
-
-    public void setTargetUri(String targetUri) {
-        this.targetUri = targetUri;
-    }
-
-    public void setScheduleId(UUID scheduleId) {
-        this.scheduleId = scheduleId;
-    }
-
-    @Override
-    public String toString() {
-        String tmpContent = (content == null ? content
-                : content.replaceAll(" ", "").replaceAll("\\t", ""));
-        tmpContent = (tmpContent != null && tmpContent.length() > 255
-                ? tmpContent.substring(0, 255) + "(...)" : tmpContent);
-
-        return "Request [content=" + tmpContent + ", createdOn="
-                + this.getCreatedOn() + ", headers=" + headers + ", id="
-                + this.getId() + ", method=" + method + ", scheduleId="
-                + scheduleId + ", targetUri=" + targetUri + "]";
     }
 
 }

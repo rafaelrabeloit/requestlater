@@ -3,8 +3,9 @@ package com.neptune.api.requestlater.domain;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import java.util.Date;
-import java.util.LinkedList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
@@ -54,7 +55,7 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
     private Date atTime;
 
     @InjectLinkNoFollow
-    private List<Request> requests;
+    private Set<Request> requests;
 
     @InjectLinks({
             @InjectLink(value = "schedules/${instance.id}", rel = "self"),
@@ -65,7 +66,7 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
     public Schedule() {
         super();
 
-        this.requests = new LinkedList<Request>();
+        this.requests = new HashSet<Request>();
     }
 
     public Schedule(UUID id) {
@@ -96,7 +97,7 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
     @OneToMany(mappedBy = "schedule", targetEntity = Request.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @XmlTransient
     @JsonIgnore
-    public List<Request> getRequests() {
+    public Set<Request> getRequests() {
         return this.requests;
     }
 
@@ -104,7 +105,7 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
         this.atTime = atTime;
     }
 
-    public void setRequests(List<Request> requests) {
+    public void setRequests(Set<Request> requests) {
         this.requests = requests;
     }
 

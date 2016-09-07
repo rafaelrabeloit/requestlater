@@ -6,6 +6,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 
 import com.neptune.api.requestlater.domain.Response;
 import com.neptune.api.requestlater.service.ResponseService;
@@ -29,6 +30,18 @@ public class ResponseResource extends ResourceTemplate<Response> {
                         UUID.fromString(requestId)));
     }
 
+    @Produces("nothing")
+    @Override
+    public javax.ws.rs.core.Response put(String id, Response entity) {
+        return javax.ws.rs.core.Response.status(405).build();
+    }
+
+    @Produces("nothing")
+    @Override
+    public javax.ws.rs.core.Response add(Response entity) {
+        return javax.ws.rs.core.Response.status(405).build();
+    }
+    
     @Override
     public ResponseService getService() {
         return service;
