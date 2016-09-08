@@ -35,10 +35,25 @@
 		<system>Jenkins</system>
 		<url>http://jen.neptune.li/job/RequestDelayer/</url>
 	</ciManagement>
+	<distributionManagement>
+		<repository>
+			<uniqueVersion>false</uniqueVersion>
+			<id>neptune.li</id>
+			<url>sftp://neptune.li/srv/mvn</url>
+		</repository>
+	</distributionManagement>
 	<scm>
 		<connection>scm:git:http://pha.neptune.li/diffusion/ARDELAYER/requestdelayer.git</connection>
 		<url>http://pha.neptune.li/diffusion/ARDELAYER/</url>
 	</scm>
+
+	<repositories>
+		<repository>
+			<id>neptune.li</id>
+			<name>Neptune.li Private Repository</name>
+			<url>sftp://neptune.li/srv/mvn</url>
+		</repository>
+	</repositories>
 
 	<!-- Build Environments -->
 	<profiles>
@@ -69,6 +84,7 @@
 		<!-- encoding -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<wagon-extension-version>2.10</wagon-extension-version>
 
 		<!--java version -->
 		<java-version>1.8</java-version>
@@ -392,5 +408,12 @@
 			</plugins>
 		</pluginManagement>
 
+		<extensions>
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-ssh</artifactId>
+				<version>${wagon-extension-version}</version>
+			</extension>
+		</extensions>
 	</build>
 </project>
