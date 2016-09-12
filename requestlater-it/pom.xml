@@ -23,6 +23,9 @@
 
 		<!-- testing artifact -->
 		<testing-artifactId>requestlater-api</testing-artifactId>
+		<requestlater-it-hostname>localhost</requestlater-it-hostname>
+		<requestlater-it-hostport>9090</requestlater-it-hostport>
+		<requestlater-it-ajpport>9010</requestlater-it-ajpport>
 	</properties>
 
 	<dependencies>
@@ -130,6 +133,10 @@
 					<includes>
 						<include>**/*IntegrationTest*</include>
 					</includes>
+					<environmentVariables>
+						<requestlater_it_hostname>${requestlater-it-hostname}</requestlater_it_hostname>
+						<requestlater_it_hostport>${requestlater-it-hostport}</requestlater_it_hostport>
+					</environmentVariables>
 				</configuration>
 				<executions>
 					<execution>
@@ -174,8 +181,8 @@
 						<home>${project.basedir}/build/${container-name}-${container-major}/container</home>
 						<properties>
 							<cargo.logging>high</cargo.logging>
-							<cargo.servlet.port>9080</cargo.servlet.port>
-							<cargo.tomcat.ajp.port>9008</cargo.tomcat.ajp.port>
+							<cargo.servlet.port>${requestlater-it-hostport}</cargo.servlet.port>
+							<cargo.tomcat.ajp.port>${requestlater-it-ajpport}</cargo.tomcat.ajp.port>
 						</properties>
 					</configuration>
 

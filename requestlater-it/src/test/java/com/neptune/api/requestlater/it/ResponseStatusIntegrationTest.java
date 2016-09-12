@@ -96,7 +96,7 @@ public class ResponseStatusIntegrationTest extends TestCase {
                 "Creation of '" + testingElement + "' should not be possible",
                 405, response.code());
 
-        while (at + 1000 > DateTime.now().getMillis()) {
+        while (at + 2000 > DateTime.now().getMillis()) {
             Thread.sleep(100);
         }
 

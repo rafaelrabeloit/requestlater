@@ -250,6 +250,16 @@
 	<build>
 		<finalName>${project.artifactId}</finalName>
 
+		<resources>
+			<resource>
+				<directory>${basedir}/src/main/resources</directory>
+				<!-- Excludes Log4j2 test config explicitly -->
+				<excludes>
+					<exclude>${log4j2-config-test}</exclude>
+				</excludes>
+			</resource>
+		</resources>
+
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -305,6 +315,28 @@
 					</deployables>
 
 				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>compile</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target name="prepare-production" if="${prepare-production}">
+								<replaceregexp
+									match='(&lt;[\s]*?persistence-unit[\s]*? name="[a-zA-Z_.-]*?-test"[\s\S^>]*?&gt;[\s\S]*?&lt;[\s]*?\/[\s]*?persistence-unit[\s]*?&gt;)'
+									replace="">
+									<fileset dir="${project.build.outputDirectory}" includes="**/persistence.xml" />
+								</replaceregexp>
+							</target>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 

@@ -64,12 +64,51 @@
 				<deploy.user>rafael</deploy.user>
 				<deploy.pass>rafael</deploy.pass>
 				<deploy.url>http://localhost:8080/manager/text</deploy.url>
+
+				<log4j2-config-test></log4j2-config-test>
+				<prepare-production>false</prepare-production>
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
 				<property>
 					<name>environment</name>
 					<value>development</value>
+				</property>
+			</activation>
+		</profile>
+		<profile>
+			<id>profile-staging</id>
+			<properties>
+				<environment>staging</environment>
+				<deploy.user>tom-script</deploy.user>
+				<deploy.pass>kT2#32CsAs</deploy.pass>
+				<deploy.url>http://10.8.0.101:8080/manager/text</deploy.url>
+
+				<log4j2-config-test>log4j2-test.xml</log4j2-config-test>
+				<prepare-production>true</prepare-production>
+			</properties>
+			<activation>
+				<property>
+					<name>environment</name>
+					<value>staging</value>
+				</property>
+			</activation>
+		</profile>
+		<profile>
+			<id>profile-production</id>
+			<properties>
+				<environment>production</environment>
+				<deploy.user>tom-script</deploy.user>
+				<deploy.pass>Yc2I9zTUp#</deploy.pass>
+				<deploy.url>http://10.8.0.1:8080/manager/text</deploy.url>
+
+				<log4j2-config-test>log4j2-test.xml</log4j2-config-test>
+				<prepare-production>true</prepare-production>
+			</properties>
+			<activation>
+				<property>
+					<name>environment</name>
+					<value>production</value>
 				</property>
 			</activation>
 		</profile>
@@ -97,6 +136,8 @@
 		<jacoco-plugin-version>0.7.7.201606060606</jacoco-plugin-version>
 		<surefire-plugin-version>2.19.1</surefire-plugin-version>
 		<failsafe-plugin-version>2.19.1</failsafe-plugin-version>
+		<antrun-plugin-version>1.8</antrun-plugin-version>
+		<help-plugin-version>2.2</help-plugin-version>
 
 		<!-- Report plugin versions -->
 		<project-info-plugin-version>2.9</project-info-plugin-version>
@@ -217,7 +258,7 @@
 				<artifactId>jackson-datatype-hibernate5</artifactId>
 				<version>${jackson-version}</version>
 			</dependency>
-			
+
 			<!-- !!Hibernate!! -->
 
 			<dependency>
@@ -405,6 +446,17 @@
 					<version>${cargo-plugin-version}</version>
 				</plugin>
 
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>${antrun-plugin-version}</version>
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-help-plugin</artifactId>
+					<version>${help-plugin-version}</version>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 

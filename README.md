@@ -17,7 +17,7 @@ calls to moments when it thinks it will have time to process something.
 Or heavy jobs being scheduled to low request times.  
 Or mailing services.  
 Or anything that would be done with cron rules.  
-*I would go farther:* Lets make asynchronous API. Not only pubsub, but really 
+*I would go further:* Lets make asynchronous API. Not only pubsub, but really 
 async, by making requests being made at a some point and only a response about 
 it being accepted and not processed sent back to the client. The process would 
 be made in an arbitrary time and the result would be returned in a new request, 
@@ -26,6 +26,17 @@ My ultimate motive is that it was fun to do. :)
 
 test & deploy
 -------------
-Use mvn cargo:redeploy to execute cargo deployment system  
-Use mvn verify to run integration tests  
-Use mvn clean site install && mvn cargo:redeploy -pl requestlater-api
+Use 
+`mvn cargo:redeploy` 
+to execute cargo deployment system  
+  
+Use 
+`mvn verify` 
+to run integration tests  
+  
+Use 
+`mvn clean site install && mvn cargo:redeploy -pl :requestlater-api`  
+  
+Use 
+`mvn clean help:evaluate -Dexpression=project.version | grep -v "^\["` 
+to get project version  

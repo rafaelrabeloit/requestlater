@@ -85,7 +85,7 @@ public class SchedulingIntegrationTest extends TestCase {
 
         assertTrue("Responses are not empty!", body.equals("[]"));
 
-        while (at + 1000 > DateTime.now().getMillis()) {
+        while (at + 2000 > DateTime.now().getMillis()) {
             Thread.sleep(100);
         }
 
