@@ -137,14 +137,4 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
                 + this.getCreatedOn() + ", at=" + atTime + "]";
     }
 
-    @Override
-    public void copy(Object t) throws IllegalArgumentException {
-        if (this.getClass() == t.getClass()) {
-            Schedule target = (Schedule) t;
-            this.setCreatedOn(target.getCreatedOn());
-            this.setId(target.getId());
-            this.setAtTime(target.getAtTime());
-        }
-    }
-
 }

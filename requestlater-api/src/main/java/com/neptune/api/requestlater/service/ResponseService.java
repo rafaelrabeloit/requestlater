@@ -5,4 +5,6 @@ import com.neptune.api.template.service.ServiceTemplate;
 
 public interface ResponseService extends ServiceTemplate<Response> {
 
+    Response last();
+
 }

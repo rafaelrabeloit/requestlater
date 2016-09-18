@@ -88,7 +88,7 @@ public class Request extends DomainTemplate implements Comparable<Request> {
 
         this.headers = new HashMap<String, String>();
         this.responses = new LinkedList<Response>();
-        
+
         this.method = HttpMethods.GET;
     }
 
@@ -185,7 +185,7 @@ public class Request extends DomainTemplate implements Comparable<Request> {
     public int compareTo(Request o) {
         return this.getPriority().compareTo(o.getPriority());
     }
-    
+
     @Override
     public String toString() {
         String tmpContent = (content == null ? content
@@ -229,10 +229,12 @@ public class Request extends DomainTemplate implements Comparable<Request> {
             // TODO: Treat and unit test this exception
             logger.error("Error Executing HTTPRequest.", e);
         } finally {
-            try {
-                response.close();
-            } catch (IOException e) {
-                logger.error("Error Closing response.", e);
+            if (response != null) {
+                try {
+                    response.close();
+                } catch (IOException e) {
+                    logger.error("Error Closing response.", e);
+                }
             }
         }
     }

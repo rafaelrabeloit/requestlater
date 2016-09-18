@@ -14,7 +14,6 @@ import com.neptune.api.requestlater.dao.ScheduleDAO;
 import com.neptune.api.requestlater.domain.Schedule;
 import com.neptune.api.template.dao.DAOTemplateImpl;
 import com.neptune.api.template.dao.Filtering;
-import com.neptune.api.template.dao.NotImplementedException;
 import com.neptune.api.template.dao.Ordering;
 import com.neptune.queue.DelayedQueue;
 import com.neptune.queue.DelayedQueue.OnTimeListener;
@@ -52,7 +51,7 @@ public class ScheduleQueue extends DAOTemplateImpl<Schedule>
     @Override
     public GenericEntity<List<Schedule>> page(Integer maxResults,
             Integer offset) {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -63,7 +62,7 @@ public class ScheduleQueue extends DAOTemplateImpl<Schedule>
 
     @Override
     public Schedule retrieve(Schedule entity) {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     @Override

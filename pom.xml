@@ -63,7 +63,7 @@
 				<environment>development</environment>
 				<deploy.user>rafael</deploy.user>
 				<deploy.pass>rafael</deploy.pass>
-				<deploy.url>http://localhost:8080/manager/text</deploy.url>
+				<deploy.url>http://127.0.0.1:8080/manager/text</deploy.url>
 
 				<log4j2-config-test></log4j2-config-test>
 				<prepare-production>false</prepare-production>

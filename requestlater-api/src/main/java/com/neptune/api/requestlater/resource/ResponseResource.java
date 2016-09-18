@@ -4,9 +4,11 @@ import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response.Status;
 
 import com.neptune.api.requestlater.domain.Response;
 import com.neptune.api.requestlater.service.ResponseService;
@@ -41,7 +43,19 @@ public class ResponseResource extends ResourceTemplate<Response> {
     public javax.ws.rs.core.Response add(Response entity) {
         return javax.ws.rs.core.Response.status(405).build();
     }
-    
+
+    @GET
+    @Path("last")
+    public javax.ws.rs.core.Response last() {
+        Response entity = this.getService().last();
+        if (entity != null) {
+            return javax.ws.rs.core.Response.status(Status.OK).entity(entity)
+                    .build();
+        } else {
+            return javax.ws.rs.core.Response.status(Status.NO_CONTENT).build();
+        }
+    }
+
     @Override
     public ResponseService getService() {
         return service;

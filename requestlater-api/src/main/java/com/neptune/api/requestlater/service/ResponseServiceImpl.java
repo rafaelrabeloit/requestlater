@@ -24,4 +24,9 @@ public class ResponseServiceImpl extends ServiceTemplateImpl<Response>
         return persistence;
     }
 
+    @Override
+    public Response last() {
+        return persistence.last();
+    }
+
 }
