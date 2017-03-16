@@ -56,6 +56,7 @@ public class ScheduleQueue extends DAOTemplateImpl<Schedule>
 
     @Override
     public Schedule create(Schedule entity) {
+        if (entity.getActive())
         queue.add(entity);
         return entity;
     }
@@ -67,7 +68,7 @@ public class ScheduleQueue extends DAOTemplateImpl<Schedule>
 
     @Override
     public Schedule update(Schedule entity) {
-        if (queue.remove(entity)) {
+        if (queue.remove(entity) && entity.getActive()) {
             queue.add(entity);
             return entity;
         } else {

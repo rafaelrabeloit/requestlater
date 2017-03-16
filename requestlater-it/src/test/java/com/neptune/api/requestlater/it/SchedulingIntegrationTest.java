@@ -98,12 +98,85 @@ public class SchedulingIntegrationTest extends TestCase {
         assertTrue(
                 "Delayed Request didn't work because didn't generate Responses",
                 !body.equals("[]"));
-        
+
         // Remove schedule TODO: Will it remove in cascade?
         baseURL = BaseTestConfig.getBaseUrlBuilder().addPathSegment("schedules")
                 .addPathSegment(scheduleId).build();
         request = new Request.Builder().url(baseURL).delete().build();
         response = client.newCall(request).execute();
-        
+
+    }
+
+    @Test
+    public void test_disablingSchedule()
+            throws IOException, InterruptedException {
+
+        long at = DateTime.now().plusSeconds(3).getMillis();
+
+        baseURL = BaseTestConfig.getBaseUrlBuilder().addPathSegment("schedules")
+                .build();
+
+        request = new Request.Builder().url(baseURL)
+                .post(RequestBody.create(MediaType.parse("application/json"),
+                        "                                           "
+                                + "{                                "
+                                + "    \"atTime\": " + at + ","
+                                + "    \"active\": false"
+                                + "}                                "))
+                .build();
+        response = client.newCall(request).execute();
+
+        // Store Response Body
+        body = response.body().string();
+
+        // Extract element Id
+        scheduleId = BaseTestConfig.extractId(body);
+
+        baseURL = BaseTestConfig.getBaseUrlBuilder().addPathSegment("schedules")
+                .addPathSegment(scheduleId).addPathSegment("requests").build();
+
+        request = new Request.Builder().url(baseURL)
+                .post(RequestBody.create(MediaType.parse("application/json"),
+                        "                                                      "
+                                + "{                                           "
+                                + "    \"targetUri\": \"" + testingTarget + "\""
+                                + "}                                           "))
+                .build();
+        response = client.newCall(request).execute();
+
+        // Store Response Body
+        body = response.body().string();
+
+        // Extract element Id
+        requestId = BaseTestConfig.extractId(body);
+
+        baseURL = BaseTestConfig.getBaseUrlBuilder().addPathSegment("requests")
+                .addPathSegment(requestId).addPathSegment("responses").build();
+
+        request = new Request.Builder().url(baseURL).build();
+        response = client.newCall(request).execute();
+
+        // Store Response Body
+        body = response.body().string();
+
+        while (at + 2000 > DateTime.now().getMillis()) {
+            Thread.sleep(100);
+        }
+
+        request = new Request.Builder().url(baseURL).build();
+        response = client.newCall(request).execute();
+
+        // Store Response Body
+        body = response.body().string();
+
+        assertTrue("Disabling didn't work because there are responses",
+                body.equals("[]"));
+
+        // clean db
+        baseURL = BaseTestConfig.getBaseUrlBuilder().addPathSegment("schedules")
+                .addPathSegment(scheduleId).build();
+        request = new Request.Builder().url(baseURL).delete().build();
+        response = client.newCall(request).execute();
+
     }
 }
