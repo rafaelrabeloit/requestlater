@@ -53,7 +53,7 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
     final static Logger logger = LogManager.getLogger(Schedule.class);
 
     private Date atTime = new Date();
-    
+
     private Boolean active = new Boolean(true);
 
     @InjectLinkNoFollow
@@ -68,6 +68,9 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
     public Schedule() {
         super();
 
+        this.atTime = new Date();
+        this.active = new Boolean(true);
+
         this.requests = new HashSet<Request>();
     }
 
@@ -81,7 +84,7 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
     public Boolean getActive() {
         return active;
     }
-    
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "at_time", nullable = false)
     public Date getAtTime() {
@@ -111,7 +114,7 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
     public void setActive(Boolean active) {
         this.active = active;
     }
-    
+
     public void setAtTime(Date atTime) {
         this.atTime = atTime;
     }

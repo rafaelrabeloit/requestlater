@@ -68,6 +68,8 @@ public class Request extends DomainTemplate implements Comparable<Request> {
     private String content;
     private Integer priority;
 
+    private Map<String, String> extractors;
+    
     @InjectLinkNoFollow
     private List<Response> responses;
 
@@ -89,6 +91,8 @@ public class Request extends DomainTemplate implements Comparable<Request> {
         this.headers = new HashMap<String, String>();
         this.responses = new LinkedList<Response>();
 
+        this.extractors = new HashMap<String, String>();
+        
         this.method = HttpMethods.GET;
     }
 
@@ -114,6 +118,13 @@ public class Request extends DomainTemplate implements Comparable<Request> {
     @CollectionTable(name = "_request_headers", joinColumns = @JoinColumn(name = "request_id"))
     public Map<String, String> getHeaders() {
         return this.headers;
+    }
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Column(name = "rule")
+    @CollectionTable(name = "_request_extractors", joinColumns = @JoinColumn(name = "request_id"))
+    public Map<String, String> getExtractors() {
+        return this.extractors;
     }
 
     @Column
@@ -159,6 +170,10 @@ public class Request extends DomainTemplate implements Comparable<Request> {
 
     public void setHeaders(Map<String, String> headers) {
         this.headers = headers;
+    }
+
+    public void setExtractors(Map<String, String> extractors) {
+        this.extractors = extractors;
     }
 
     public void setMethod(HttpMethods method) {

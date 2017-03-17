@@ -119,6 +119,11 @@
 			<artifactId>hibernate-c3p0</artifactId>
 		</dependency>
 
+		<!-- jsoup HTML parser library @ http://jsoup.org/ -->
+		<dependency>
+			<groupId>org.jsoup</groupId>
+			<artifactId>jsoup</artifactId>
+		</dependency>
 
 		<!-- DI -->
 		<dependency>

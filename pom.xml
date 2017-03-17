@@ -285,6 +285,12 @@
 				<version>${hibernate-version}</version>
 			</dependency>
 
+			<!-- jsoup HTML parser library @ http://jsoup.org/ -->
+			<dependency>
+				<groupId>org.jsoup</groupId>
+				<artifactId>jsoup</artifactId>
+				<version>${jsoup-version}</version>
+			</dependency>
 
 			<!-- DI -->
 			<dependency>
