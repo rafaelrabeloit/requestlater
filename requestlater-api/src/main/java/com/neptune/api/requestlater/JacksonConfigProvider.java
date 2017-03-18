@@ -10,11 +10,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 
+/**
+ * Overrides Jackson provider, for how to serialize dates
+ * 
+ * @author Rafael R. Itajuba
+ *
+ */
 @Provider
 public class JacksonConfigProvider implements ContextResolver<ObjectMapper> {
 
     final ObjectMapper defaultObjectMapper;
 
+    /**
+     * Overrides Jackson provider, for how to serialize dates
+     * @return the object mapper
+     */
     private static ObjectMapper createDefaultMapper() {
         final ObjectMapper map = new ObjectMapper();
 
@@ -32,7 +42,7 @@ public class JacksonConfigProvider implements ContextResolver<ObjectMapper> {
     }
 
     @Override
-    public ObjectMapper getContext(Class<?> type) {
+    public ObjectMapper getContext(final Class<?> type) {
         return defaultObjectMapper;
 
     }

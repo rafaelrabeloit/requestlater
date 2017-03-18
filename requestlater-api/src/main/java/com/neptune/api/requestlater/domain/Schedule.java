@@ -52,9 +52,9 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
 
     final static Logger logger = LogManager.getLogger(Schedule.class);
 
-    private Date atTime = new Date();
+    private Date atTime;
 
-    private Boolean active = new Boolean(true);
+    private Boolean active;
 
     @InjectLinkNoFollow
     private Set<Request> requests;
@@ -69,7 +69,7 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
         super();
 
         this.atTime = new Date();
-        this.active = new Boolean(true);
+        this.active = Boolean.TRUE;
 
         this.requests = new HashSet<Request>();
     }
