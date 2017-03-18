@@ -3,8 +3,10 @@ package com.neptune.api.requestlater.domain;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Delayed;
@@ -45,12 +47,9 @@ import com.neptune.api.template.domain.DomainTemplate;
 @XmlRootElement
 public class Schedule extends DomainTemplate implements Delayed, Runnable {
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = -3131395094924167679L;
 
-    final static Logger logger = LogManager.getLogger(Schedule.class);
+    final static Logger LOGGER = LogManager.getLogger(Schedule.class);
 
     private Date atTime;
 
@@ -65,6 +64,8 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
     @XmlJavaTypeAdapter(LinkAdapter.class)
     private List<Link> links;
 
+    private Map<String, List<String>> variables;
+
     public Schedule() {
         super();
 
@@ -72,6 +73,7 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
         this.active = Boolean.TRUE;
 
         this.requests = new HashSet<Request>();
+        this.variables = new HashMap<>();
     }
 
     public Schedule(UUID id) {
@@ -134,12 +136,12 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
 
     @Override
     public void run() {
-        logger.debug("Firing " + this);
+        LOGGER.debug("Firing " + this);
 
         // In JPA, this will be Lazy Load, and the data will load accordingly
         // In Memory Storage, requests is ensured to be always referenced
         // correctly
-        logger.debug("Running Requests: " + this.getRequests());
+        LOGGER.debug("Running Requests: " + this.getRequests());
         for (Request req : this.getRequests()) {
             req.process();
         }
@@ -149,6 +151,13 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
     public String toString() {
         return "Schedule [id=" + this.getId() + ", createdOn="
                 + this.getCreatedOn() + ", at=" + atTime + "]";
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    @Transient
+    public void addVariables(Map<String, List<String>> variables) {
+        this.variables.putAll(variables);
     }
 
 }

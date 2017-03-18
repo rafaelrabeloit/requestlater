@@ -42,6 +42,7 @@ import org.glassfish.jersey.linking.InjectLink;
 import org.glassfish.jersey.linking.InjectLinkNoFollow;
 import org.glassfish.jersey.linking.InjectLinks;
 
+import com.neptune.api.requestlater.DataExtractor;
 import com.neptune.api.template.adapter.LinkAdapter;
 import com.neptune.api.template.domain.DomainTemplate;
 
@@ -55,12 +56,9 @@ import com.neptune.api.template.domain.DomainTemplate;
 @XmlRootElement
 public class Request extends DomainTemplate implements Comparable<Request> {
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = -7118587426722305792L;
 
-    final static Logger logger = LogManager.getLogger(Request.class);
+    final static Logger LOGGER = LogManager.getLogger(Request.class);
 
     private Map<String, String> headers;
     private HttpMethods method;
@@ -69,7 +67,7 @@ public class Request extends DomainTemplate implements Comparable<Request> {
     private Integer priority;
 
     private Map<String, String> extractors;
-    
+
     @InjectLinkNoFollow
     private List<Response> responses;
 
@@ -92,7 +90,7 @@ public class Request extends DomainTemplate implements Comparable<Request> {
         this.responses = new LinkedList<Response>();
 
         this.extractors = new HashMap<String, String>();
-        
+
         this.method = HttpMethods.GET;
     }
 
@@ -218,7 +216,7 @@ public class Request extends DomainTemplate implements Comparable<Request> {
      * Process this request.
      */
     public void process() {
-        logger.debug("Request Processing: " + this);
+        LOGGER.debug("Request Processing: " + this);
 
         HttpUriRequest request = this.build();
 
@@ -231,7 +229,12 @@ public class Request extends DomainTemplate implements Comparable<Request> {
             resp.peel(response);
             resp.setRequest(this);
 
-            logger.debug("HTTPRequest completed, with response: " + resp);
+            LOGGER.debug("HTTPRequest completed, with response: " + resp);
+
+            Map<String, List<String>> variables = DataExtractor
+                    .extractWithSelector(resp.getContent(),
+                            this.getExtractors());
+            this.schedule.addVariables(variables);
 
             // JPA ensures that this will persist() when update
             // Memory Storage will handle this in DAO
@@ -239,16 +242,16 @@ public class Request extends DomainTemplate implements Comparable<Request> {
 
         } catch (ClientProtocolException e) {
             // TODO: Treat and unit test this exception
-            logger.error("Error Executing HTTPRequest.", e);
+            LOGGER.error("Error Executing HTTPRequest.", e);
         } catch (IOException e) {
             // TODO: Treat and unit test this exception
-            logger.error("Error Executing HTTPRequest.", e);
+            LOGGER.error("Error Executing HTTPRequest.", e);
         } finally {
             if (response != null) {
                 try {
                     response.close();
                 } catch (IOException e) {
-                    logger.error("Error Closing response.", e);
+                    LOGGER.error("Error Closing response.", e);
                 }
             }
         }
