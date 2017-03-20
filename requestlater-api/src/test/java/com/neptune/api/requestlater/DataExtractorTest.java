@@ -17,16 +17,16 @@ public class DataExtractorTest extends Mockito {
     Map<String, List<String>> result = new HashMap<>();
     public Map<String, String> rules = new HashMap<>();
 
-    public Map<String, List<String>> expected0 = new HashMap<>();
-    public String case0 = "<html>                                             "
+    public static Map<String, List<String>> EXPECTED0 = new HashMap<>();
+    public static String CASE0 = "<html>                                      "
             + "              <body>                                           "
             + "                <p>12345</p>                                   "
             + "                <p>var2='abcd'</p>                             "
             + "              </body>                                          "
             + "            </html>                                            ";
 
-    public Map<String, List<String>> expected1 = new HashMap<>();
-    public String case1 = "<html>                                             "
+    public static Map<String, List<String>> EXPECTED1 = new HashMap<>();
+    public static String CASE1 = "<html>                                      "
             + "<head>                                                         "
             + "</head>                                                        "
             + "<body>                                                         "
@@ -193,10 +193,10 @@ public class DataExtractorTest extends Mockito {
 
     @Before
     public void setUp() {
-        expected0.put("VAR1", Arrays.asList("12345", "var2='abcd'"));
-        expected0.put("VAR2", Arrays.asList("var2='abcd'"));
+        EXPECTED0.put("VAR1", Arrays.asList("12345", "var2='abcd'"));
+        EXPECTED0.put("VAR2", Arrays.asList("var2='abcd'"));
 
-        expected1.put("DATAS", Arrays.asList(" ", "01 de janeiro", "( Sexta )",
+        EXPECTED1.put("DATAS", Arrays.asList(" ", "01 de janeiro", "( Sexta )",
                 "Dia Mundial da Paz", " ", "08 de fevereiro", "( Segunda )",
                 "Carnaval", " ", "09 de fevereiro", "( Terça )", "Carnaval",
                 " ", "25 de março", "( Sexta )", "Sexta-Feira da Paixão", " ",
@@ -222,9 +222,9 @@ public class DataExtractorTest extends Mockito {
         rules.put("VAR1", "<p>(.+?)</p>");
         rules.put("VAR2", "<p>(var2='(:?.*)')</p>");
 
-        result = DataExtractor.extractWithRegex(case0, rules);
+        result = DataExtractor.extractWithRegex(CASE0, rules);
 
-        assertEquals("data wasn't extracted correctly", expected0.toString(),
+        assertEquals("data wasn't extracted correctly", EXPECTED0.toString(),
                 result.toString());
 
     }
@@ -235,9 +235,9 @@ public class DataExtractorTest extends Mockito {
         rules.put("VAR1", "p");
         rules.put("VAR2", "p:not(:first-child)");
 
-        result = DataExtractor.extractWithSelector(case0, rules);
+        result = DataExtractor.extractWithSelector(CASE0, rules);
 
-        assertEquals("data wasn't extracted correctly", expected0.toString(),
+        assertEquals("data wasn't extracted correctly", EXPECTED0.toString(),
                 result.toString());
 
     }
@@ -247,9 +247,9 @@ public class DataExtractorTest extends Mockito {
 
         rules.put("DATAS", "td");
 
-        result = DataExtractor.extractWithSelector(case1, rules);
+        result = DataExtractor.extractWithSelector(CASE1, rules);
 
-        assertEquals("data wasn't extracted correctly", expected1.toString(),
+        assertEquals("data wasn't extracted correctly", EXPECTED1.toString(),
                 result.toString());
 
     }

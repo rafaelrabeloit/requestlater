@@ -2,13 +2,11 @@ package com.neptune.api.requestlater.domain;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
@@ -48,7 +46,6 @@ import org.glassfish.jersey.linking.InjectLink;
 import org.glassfish.jersey.linking.InjectLinkNoFollow;
 import org.glassfish.jersey.linking.InjectLinks;
 
-import com.neptune.api.requestlater.DataExtractor;
 import com.neptune.api.template.adapter.LinkAdapter;
 import com.neptune.api.template.domain.DomainTemplate;
 
@@ -329,9 +326,10 @@ public class Request extends DomainTemplate implements Comparable<Request> {
     private String formattedContent() {
         String formattedContent = content;
 
-        this.schedule.getVariables().forEach((key, val) -> {
-            formattedContent.replace(key, val.get(0));
-        });
+        for (String key : this.schedule.getVariables().keySet()) {
+            formattedContent = formattedContent.replace(key,
+                    this.schedule.getVariables().get(key).get(0));
+        }
 
         return formattedContent;
     }
