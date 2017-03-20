@@ -2,6 +2,7 @@ package com.neptune.api.requestlater.domain;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,6 +12,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -34,6 +36,7 @@ import org.glassfish.jersey.linking.InjectLinkNoFollow;
 import org.glassfish.jersey.linking.InjectLinks;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.neptune.api.requestlater.DataExtractor;
 import com.neptune.api.template.adapter.LinkAdapter;
 import com.neptune.api.template.domain.DomainTemplate;
 
@@ -113,6 +116,13 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
         return this.requests;
     }
 
+    @XmlTransient
+    @JsonIgnore
+    @Transient
+    public Map<String, List<String>> getVariables() {
+        return this.variables;
+    }
+
     public void setActive(Boolean active) {
         this.active = active;
     }
@@ -153,11 +163,25 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
                 + this.getCreatedOn() + ", at=" + atTime + "]";
     }
 
-    @XmlTransient
-    @JsonIgnore
-    @Transient
-    public void addVariables(Map<String, List<String>> variables) {
+    /**
+     * Add (or update) variables in this "global", using a local context rules
+     * that is a request, based on its response.
+     * @param response response from where data will be extracted
+     * @param context request from that response, that contains rules
+     */
+    public void addVariables(Response response, Request context) {
+        Map<String, List<String>> variables;
+
+        // read response's headers and add as variables
+        variables = response.getHeaders().entrySet().stream().collect(Collectors
+                .toMap(Map.Entry::getKey, e -> Arrays.asList(e.getValue())));
         this.variables.putAll(variables);
+
+        // extract data using requests rules
+        variables = DataExtractor.extractWithSelector(response.getContent(),
+                context.getExtractors());
+        this.variables.putAll(variables);
+
     }
 
 }

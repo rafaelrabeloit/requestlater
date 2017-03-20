@@ -1,11 +1,14 @@
 package com.neptune.api.requestlater.domain;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
@@ -24,9 +27,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpOptions;
@@ -34,6 +39,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpTrace;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.logging.log4j.LogManager;
@@ -226,19 +232,17 @@ public class Request extends DomainTemplate implements Comparable<Request> {
             response = httpclient.execute(request);
 
             Response resp = new Response();
-            resp.peel(response);
             resp.setRequest(this);
+            resp.peel(response);
 
             LOGGER.debug("HTTPRequest completed, with response: " + resp);
-
-            Map<String, List<String>> variables = DataExtractor
-                    .extractWithSelector(resp.getContent(),
-                            this.getExtractors());
-            this.schedule.addVariables(variables);
 
             // JPA ensures that this will persist() when update
             // Memory Storage will handle this in DAO
             this.getResponses().add(resp);
+
+            // update global context with variables
+            this.schedule.addVariables(resp, this);
 
         } catch (ClientProtocolException e) {
             // TODO: Treat and unit test this exception
@@ -269,11 +273,11 @@ public class Request extends DomainTemplate implements Comparable<Request> {
         case POST:
             ret = new HttpPost(this.targetUri);
             break;
-        case DELETE:
-            ret = new HttpDelete(this.targetUri);
-            break;
         case PUT:
             ret = new HttpPut(this.targetUri);
+            break;
+        case DELETE:
+            ret = new HttpDelete(this.targetUri);
             break;
         case HEAD:
             ret = new HttpHead(this.targetUri);
@@ -289,11 +293,47 @@ public class Request extends DomainTemplate implements Comparable<Request> {
             break;
         }
 
-        headers.forEach((key, val) -> {
-            ret.addHeader(key, val);
+        this.headers.forEach((key, val) -> {
+            if (this.schedule != null
+                    && this.schedule.getVariables().containsKey(val)) {
+                ret.addHeader(key,
+                        this.schedule.getVariables().get(val).get(0));
+            } else {
+                ret.addHeader(key, val);
+            }
         });
 
+        // TODO: http patch support
+        if (this.method == HttpMethods.POST || this.method == HttpMethods.PUT) {
+            HttpEntityEnclosingRequestBase requestWithEntity = (HttpEntityEnclosingRequestBase) ret;
+            HttpEntity entity;
+
+            try {
+                entity = new StringEntity(this.formattedContent());
+                requestWithEntity.setEntity(entity);
+            } catch (UnsupportedEncodingException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+        }
+
         return ret;
+    }
+
+    /**
+     * Replace any occurrences of variables and return the resulting string.
+     * 
+     * @return The string with 'content' using variables values
+     */
+    private String formattedContent() {
+        String formattedContent = content;
+
+        this.schedule.getVariables().forEach((key, val) -> {
+            formattedContent.replace(key, val.get(0));
+        });
+
+        return formattedContent;
     }
 
 }
