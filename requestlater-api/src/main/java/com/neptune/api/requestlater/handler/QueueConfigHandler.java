@@ -18,7 +18,7 @@ import com.neptune.api.requestlater.domain.Schedule;
 import com.neptune.queue.DelayedQueue.OnTimeListener;
 
 public class QueueConfigHandler implements ApplicationEventListener {
-    final static Logger LOGGER = LogManager.getLogger(QueueConfigHandler.class);
+    static final Logger LOGGER = LogManager.getLogger(QueueConfigHandler.class);
 
     @Inject
     @PersistenceUnit(unitName = "requestlater")

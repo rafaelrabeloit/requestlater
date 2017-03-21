@@ -22,7 +22,7 @@ import com.neptune.queue.DelayedQueue.OnTimeListener;
 @Singleton
 public class ScheduleQueue extends DAOTemplateImpl<Schedule>
         implements ScheduleDAO {
-    final static Logger LOGGER = LogManager
+    static final Logger LOGGER = LogManager
             .getLogger(ScheduleQueue.class);
 
     /**

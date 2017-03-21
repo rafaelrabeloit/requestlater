@@ -21,7 +21,7 @@ import com.neptune.api.template.storage.jpa.StorageTemplateJPA;
 public class ResponseJPA extends StorageTemplateJPA<Response>
         implements ResponseDAO {
 
-    final static Logger LOGGER = LogManager.getLogger(Request.class);
+    static final Logger LOGGER = LogManager.getLogger(Request.class);
 
     /**
      * 

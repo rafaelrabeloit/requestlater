@@ -16,7 +16,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class ResponseStatusIntegrationTest extends TestCase {
-    final static Logger LOGGER = LogManager
+    static final Logger LOGGER = LogManager
             .getLogger(ResponseStatusIntegrationTest.class);
 
     OkHttpClient client = new OkHttpClient();

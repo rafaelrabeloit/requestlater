@@ -16,7 +16,7 @@ import com.neptune.api.template.storage.jpa.JPAStorage;
 public class ScheduleServiceImpl extends ServiceTemplateImpl<Schedule>
         implements ScheduleService {
 
-    final static Logger LOGGER = LogManager
+    static final Logger LOGGER = LogManager
             .getLogger(ScheduleServiceImpl.class);
 
     @Inject

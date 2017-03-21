@@ -61,7 +61,7 @@ public class Request extends DomainTemplate implements Comparable<Request> {
 
     private static final long serialVersionUID = -7118587426722305792L;
 
-    final static Logger LOGGER = LogManager.getLogger(Request.class);
+    static final Logger LOGGER = LogManager.getLogger(Request.class);
 
     private Map<String, String> headers;
     private HttpMethods method;

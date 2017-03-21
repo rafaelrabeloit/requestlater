@@ -52,7 +52,7 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
 
     private static final long serialVersionUID = -3131395094924167679L;
 
-    final static Logger LOGGER = LogManager.getLogger(Schedule.class);
+    static final Logger LOGGER = LogManager.getLogger(Schedule.class);
 
     private Date atTime;
 

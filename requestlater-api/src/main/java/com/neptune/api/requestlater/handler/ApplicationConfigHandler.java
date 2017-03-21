@@ -12,7 +12,7 @@ import com.mchange.v2.c3p0.PooledDataSource;
 import com.mysql.jdbc.AbandonedConnectionCleanupThread;
 
 public class ApplicationConfigHandler implements ApplicationEventListener {
-    final static Logger LOGGER = LogManager
+    static final Logger LOGGER = LogManager
             .getLogger(ApplicationConfigHandler.class);
 
     @Override

@@ -16,7 +16,7 @@ import okhttp3.Response;
 
 public class ScheduleStatusIntegrationTest extends TestCase {
 
-    final static Logger LOGGER = LogManager
+    static final Logger LOGGER = LogManager
             .getLogger(ScheduleStatusIntegrationTest.class);
 
     OkHttpClient client = new OkHttpClient();
