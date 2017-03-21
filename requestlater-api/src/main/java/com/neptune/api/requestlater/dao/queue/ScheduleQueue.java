@@ -22,8 +22,8 @@ import com.neptune.queue.DelayedQueue.OnTimeListener;
 @Singleton
 public class ScheduleQueue extends DAOTemplateImpl<Schedule>
         implements ScheduleDAO {
-    static final Logger LOGGER = LogManager
-            .getLogger(ScheduleQueue.class);
+
+    static final Logger LOGGER = LogManager.getLogger(ScheduleQueue.class);
 
     /**
      * Queue used for this elements
@@ -36,6 +36,9 @@ public class ScheduleQueue extends DAOTemplateImpl<Schedule>
         queue = new DelayedQueue<>();
     }
 
+    /**
+     * Stops the queue. Used for undeploy the service.
+     */
     public void stop() {
         try {
             this.queue.stop();
@@ -43,11 +46,11 @@ public class ScheduleQueue extends DAOTemplateImpl<Schedule>
             LOGGER.error("Queue Stop was Interrupted!", e);
         }
     }
-    
+
     public void setOnTimeListener(OnTimeListener<Schedule> listener) {
         this.queue.setOnTimeListener(listener);
     }
-    
+
     @Override
     public GenericEntity<List<Schedule>> page(Integer maxResults,
             Integer offset) {
@@ -56,8 +59,9 @@ public class ScheduleQueue extends DAOTemplateImpl<Schedule>
 
     @Override
     public Schedule create(Schedule entity) {
-        if (entity.getActive())
-        queue.add(entity);
+        if (entity.getActive()) {
+            queue.add(entity);
+        }
         return entity;
     }
 

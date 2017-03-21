@@ -45,9 +45,6 @@ import com.neptune.api.template.domain.DomainTemplate;
 @XmlRootElement
 public class Response extends DomainTemplate {
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = -1405742943228752633L;
 
     static final Logger LOGGER = LogManager.getLogger(Response.class);

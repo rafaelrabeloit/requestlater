@@ -26,8 +26,9 @@ public class RequestResource extends ResourceTemplate<Request> {
 
     @PostConstruct
     public void setFilters() {
-        service.getDAO().getFilters().add(new Filtering(
-                Filtering.Operation.EQUAL, "scheduleId", UUID.fromString(scheduleId)));
+        service.getDAO().getFilters()
+                .add(new Filtering(Filtering.Operation.EQUAL, "scheduleId",
+                        UUID.fromString(scheduleId)));
     }
 
     @Override

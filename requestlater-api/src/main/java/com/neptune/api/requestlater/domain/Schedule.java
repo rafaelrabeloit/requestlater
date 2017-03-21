@@ -166,8 +166,11 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
     /**
      * Add (or update) variables in this "global", using a local context rules
      * that is a request, based on its response.
-     * @param response response from where data will be extracted
-     * @param context request from that response, that contains rules
+     * 
+     * @param response
+     *            response from where data will be extracted
+     * @param context
+     *            request from that response, that contains rules
      */
     public void addVariables(Response response, Request context) {
         Map<String, List<String>> variables;
