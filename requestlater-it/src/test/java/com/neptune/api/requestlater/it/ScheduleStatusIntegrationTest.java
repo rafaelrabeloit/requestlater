@@ -16,7 +16,7 @@ import okhttp3.Response;
 
 public class ScheduleStatusIntegrationTest extends TestCase {
 
-    final static Logger logger = LogManager
+    final static Logger LOGGER = LogManager
             .getLogger(ScheduleStatusIntegrationTest.class);
 
     OkHttpClient client = new OkHttpClient();
@@ -55,7 +55,7 @@ public class ScheduleStatusIntegrationTest extends TestCase {
 
         // Store Response Body
         body = response.body().string();
-        logger.info("Schedule Body [visibility]: " + body);
+        LOGGER.info("Schedule Body [visibility]: " + body);
 
         assertEquals(
                 "Adding element to '" + testingElement

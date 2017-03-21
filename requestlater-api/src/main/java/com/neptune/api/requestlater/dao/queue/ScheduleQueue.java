@@ -22,7 +22,7 @@ import com.neptune.queue.DelayedQueue.OnTimeListener;
 @Singleton
 public class ScheduleQueue extends DAOTemplateImpl<Schedule>
         implements ScheduleDAO {
-    final static Logger logger = LogManager
+    final static Logger LOGGER = LogManager
             .getLogger(ScheduleQueue.class);
 
     /**
@@ -40,7 +40,7 @@ public class ScheduleQueue extends DAOTemplateImpl<Schedule>
         try {
             this.queue.stop();
         } catch (InterruptedException e) {
-            logger.error("Queue Stop was Interrupted!", e);
+            LOGGER.error("Queue Stop was Interrupted!", e);
         }
     }
     

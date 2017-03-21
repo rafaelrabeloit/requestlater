@@ -16,7 +16,7 @@ import com.neptune.api.template.storage.jpa.JPAStorage;
 public class ScheduleServiceImpl extends ServiceTemplateImpl<Schedule>
         implements ScheduleService {
 
-    final static Logger logger = LogManager
+    final static Logger LOGGER = LogManager
             .getLogger(ScheduleServiceImpl.class);
 
     @Inject
@@ -43,7 +43,7 @@ public class ScheduleServiceImpl extends ServiceTemplateImpl<Schedule>
         try {
             queue.update(entity);
         } catch (NoSuchElementException e) {
-            logger.debug("Element " + entity + " is not on queue");
+            LOGGER.debug("Element " + entity + " is not on queue");
         }
         return super.update(entity);
     }
@@ -53,7 +53,7 @@ public class ScheduleServiceImpl extends ServiceTemplateImpl<Schedule>
         try {
             queue.delete(entity);
         } catch (NoSuchElementException e) {
-            logger.debug("Element " + entity + " is not on queue");
+            LOGGER.debug("Element " + entity + " is not on queue");
         }
         return super.delete(entity);
     }

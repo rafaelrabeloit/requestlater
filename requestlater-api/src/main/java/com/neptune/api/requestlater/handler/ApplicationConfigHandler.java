@@ -12,7 +12,7 @@ import com.mchange.v2.c3p0.PooledDataSource;
 import com.mysql.jdbc.AbandonedConnectionCleanupThread;
 
 public class ApplicationConfigHandler implements ApplicationEventListener {
-    final static Logger logger = LogManager
+    final static Logger LOGGER = LogManager
             .getLogger(ApplicationConfigHandler.class);
 
     @Override
@@ -20,7 +20,7 @@ public class ApplicationConfigHandler implements ApplicationEventListener {
         switch (event.getType()) {
         case INITIALIZATION_FINISHED:
 
-            logger.info("Application "
+            LOGGER.info("Application "
                     + event.getResourceConfig().getApplicationName()
                     + " init done.");
 
@@ -40,10 +40,10 @@ public class ApplicationConfigHandler implements ApplicationEventListener {
             try {
                 AbandonedConnectionCleanupThread.shutdown();
             } catch (InterruptedException e) {
-                logger.error("SEVERE problem cleaning up.", e);
+                LOGGER.error("SEVERE problem cleaning up.", e);
             }
 
-            logger.info("Application "
+            LOGGER.info("Application "
                     + event.getResourceConfig().getApplicationName()
                     + " terminated");
             break;

@@ -50,7 +50,7 @@ public class Response extends DomainTemplate {
      */
     private static final long serialVersionUID = -1405742943228752633L;
 
-    final static Logger logger = LogManager.getLogger(Response.class);
+    final static Logger LOGGER = LogManager.getLogger(Response.class);
 
     private Map<String, String> headers;
 
@@ -154,10 +154,10 @@ public class Response extends DomainTemplate {
         try {
             this.setContent(EntityUtils.toString(entity));
         } catch (ParseException e) {
-            logger.error("Error Parsing entity body from HTTPResponse.", e);
+            LOGGER.error("Error Parsing entity body from HTTPResponse.", e);
             // TODO: Treat and unit test this exception
         } catch (IOException e) {
-            logger.error("IO Error parsing entity body from HTTPResponse.", e);
+            LOGGER.error("IO Error parsing entity body from HTTPResponse.", e);
             // TODO: Treat and unit test this exception
         }
     }

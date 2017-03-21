@@ -16,7 +16,7 @@ import okhttp3.Response;
 
 public class RequestStatusIntegrationTest extends TestCase {
 
-    final static Logger logger = LogManager
+    final static Logger LOGGER = LogManager
             .getLogger(RequestStatusIntegrationTest.class);
 
     OkHttpClient client = new OkHttpClient();
@@ -62,7 +62,7 @@ public class RequestStatusIntegrationTest extends TestCase {
 
         // Store Response Body
         body = response.body().string();
-        logger.info("Schedule Body [visibility]: " + body);
+        LOGGER.info("Schedule Body [visibility]: " + body);
 
         scheduleId = BaseTestConfig.extractId(body);
         baseURL = BaseTestConfig.getBaseUrlBuilder().addPathSegment("schedules")
@@ -85,7 +85,7 @@ public class RequestStatusIntegrationTest extends TestCase {
 
         // Store Response Body
         body = response.body().string();
-        logger.info("Request Body [visibility]: " + body);
+        LOGGER.info("Request Body [visibility]: " + body);
 
         assertEquals(
                 "Adding element to '" + testingElement

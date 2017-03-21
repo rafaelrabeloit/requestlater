@@ -21,7 +21,7 @@ import com.neptune.api.template.storage.jpa.StorageTemplateJPA;
 public class ResponseJPA extends StorageTemplateJPA<Response>
         implements ResponseDAO {
 
-    final static Logger logger = LogManager.getLogger(Request.class);
+    final static Logger LOGGER = LogManager.getLogger(Request.class);
 
     /**
      * 
@@ -50,7 +50,7 @@ public class ResponseJPA extends StorageTemplateJPA<Response>
         try {
             returned = result.get(0);
         } catch (IndexOutOfBoundsException e) {
-            logger.info("There is no last Response for this Request.");
+            LOGGER.info("There is no last Response for this Request.");
         }
         return returned;
     }
