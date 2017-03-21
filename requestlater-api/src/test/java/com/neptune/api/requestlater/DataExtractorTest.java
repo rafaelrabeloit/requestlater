@@ -191,6 +191,8 @@ public class DataExtractorTest extends Mockito {
             + "</body>                                                        "
             + "</html>                                                        ";
 
+    public static Map<String, List<String>> EXPECTED1_WITH_CHILDREN = new HashMap<>();
+
     @Before
     public void setUp() {
         EXPECTED0.put("VAR1", Arrays.asList("12345", "var2='abcd'"));
@@ -208,6 +210,9 @@ public class DataExtractorTest extends Mockito {
                 "( Quarta )", "Finados", " ", "15 de novembro", "( Terça )",
                 "Proclamação da República", " ", "25 de dezembro",
                 "( Domingo )", "Natal"));
+
+        EXPECTED1_WITH_CHILDREN.put("DATAS", Arrays.asList(
+                "[[[\" \"],[\"01 de janeiro\"],[\"( Sexta )\"],[\"Dia Mundial da Paz\"]],[[\" \"],[\"08 de fevereiro\"],[\"( Segunda )\"],[\"Carnaval\"]],[[\" \"],[\"09 de fevereiro\"],[\"( Terça )\"],[\"Carnaval\"]],[[\" \"],[\"25 de março\"],[\"( Sexta )\"],[\"Sexta-Feira da Paixão\"]],[[\" \"],[\"21 de abril\"],[\"( Quinta )\"],[\"Tiradentes\"]],[[\" \"],[\"01 de maio\"],[\"( Domingo )\"],[\"Dia do Trabalho\"]],[[\" \"],[\"26 de junho\"],[\"( Domingo )\"],[\"Corpus Christi\"]],[[\" \"],[\"07 de setembro\"],[\"( Quarta )\"],[\"Independência do Brasil\"]],[[\" \"],[\"12 de outubro\"],[\"( Quarta )\"],[\"Nossa Srª Aparecida\"]],[[\" \"],[\"02 de novembro\"],[\"( Quarta )\"],[\"Finados\"]],[[\" \"],[\"15 de novembro\"],[\"( Terça )\"],[\"Proclamação da República\"]],[[\" \"],[\"25 de dezembro\"],[\"( Domingo )\"],[\"Natal\"]]]"));
     }
 
     @After
@@ -241,7 +246,7 @@ public class DataExtractorTest extends Mockito {
                 result.toString());
 
     }
-    
+
     @Test
     public void test_extractCase1WithSelector() {
 
@@ -251,6 +256,18 @@ public class DataExtractorTest extends Mockito {
 
         assertEquals("data wasn't extracted correctly", EXPECTED1.toString(),
                 result.toString());
+
+    }
+
+    @Test
+    public void test_extractCase1WithSelectorAndElementWithChildre() {
+
+        rules.put("DATAS", ".fundo-table2 tbody");
+
+        result = DataExtractor.extractWithSelector(CASE1, rules);
+
+        assertEquals("data wasn't extracted correctly",
+                EXPECTED1_WITH_CHILDREN.toString(), result.toString());
 
     }
 }

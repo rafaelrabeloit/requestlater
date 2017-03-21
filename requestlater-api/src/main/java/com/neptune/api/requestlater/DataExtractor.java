@@ -11,6 +11,10 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jboss.weld.exceptions.UnsupportedOperationException;
@@ -32,8 +36,8 @@ public class DataExtractor {
     static final Logger LOGGER = LogManager.getLogger(DataExtractor.class);
 
     /**
-     * Extract data from 'content', using 'rules'. Each rule is identified by
-     * its key, that should be used later to identify the result.
+     * Extract data from @content, using @rules. Each rule is identified by its
+     * key, that should be used later to identify the result.
      * 
      * @param content
      *            buffer where the raw data is stored
@@ -67,8 +71,8 @@ public class DataExtractor {
     }
 
     /**
-     * Extract data from 'content', using 'rules'. Each rule is identified by
-     * its key, that should be used later to identify the result.
+     * Extract data from @content, using @rules. Each rule is identified by its
+     * key, that should be used later to identify the result.
      * 
      * @param content
      *            buffer where the raw data is stored
@@ -93,7 +97,7 @@ public class DataExtractor {
             List<String> matches = new LinkedList<>();
 
             for (Element el : els) {
-                matches.add(el.ownText());
+                matches.add(selectorValue(el));
             }
 
             result.put(v, matches);
@@ -102,4 +106,60 @@ public class DataExtractor {
         return result;
     }
 
+    /**
+     * This function retrieve a string representation for the element el. If the
+     * element has children, then this representation will be a json array.
+     * 
+     * @param el
+     *            root element for this selector
+     * @return String representation for the root element @el
+     */
+    private static String selectorValue(Element el) {
+        ObjectMapper mapper = new ObjectMapper();
+        ArrayNode array = mapper.createArrayNode();
+
+        String result = "";
+
+        if (el.children().size() == 0) {
+            result = el.ownText();
+        } else {
+            process(el, array, mapper);
+            result = array.toString();
+        }
+
+        return result;
+    }
+
+    /**
+     * Process, recursively, the element @el into a @list
+     * 
+     * @param el
+     *            the actual root node of the DOM
+     * @param array
+     *            the json array where this element should be added
+     * @param mapper
+     *            is passed down from root call
+     */
+    private static void process(Element el, ArrayNode array,
+            ObjectMapper mapper) {
+
+        if (el.children().size() == 0) {
+            if (el.ownText().trim().length() != 0) {
+                array.add(el.ownText().trim());
+            }
+        } else {
+            for (Element ec : el.children()) {
+                ArrayNode ch = mapper.createArrayNode();
+
+                // This comes first because .build() happens on .add() ;)
+                process(ec, ch, mapper);
+
+                if (el.ownText().trim().length() == 0) {
+                    array.add(ch);
+                } else {
+                    array.add(el.ownText().trim());
+                }
+            }
+        }
+    }
 }
