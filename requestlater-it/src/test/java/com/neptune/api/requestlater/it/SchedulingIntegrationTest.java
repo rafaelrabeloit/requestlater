@@ -5,24 +5,23 @@ import java.io.IOException;
 import org.joda.time.DateTime;
 import org.junit.Test;
 
+import com.neptune.api.requestlater.client.RequestSimpleClient;
+import com.neptune.api.requestlater.client.ResponseSimpleClient;
+import com.neptune.api.requestlater.client.ScheduleSimpleClient;
+
 import junit.framework.TestCase;
-import okhttp3.HttpUrl;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class SchedulingIntegrationTest extends TestCase {
 
-    OkHttpClient client = new OkHttpClient();
-
-    Request request;
+    ScheduleSimpleClient scheduleClient = new ScheduleSimpleClient();
+    RequestSimpleClient requestClient = new RequestSimpleClient();
+    ResponseSimpleClient responseClient = new ResponseSimpleClient();
+    
     Response response;
 
     String body;
 
-    HttpUrl baseURL;
     String testingTarget = BaseTestConfig.getBaseUrlBuilder().build()
             .toString();
 
@@ -38,49 +37,17 @@ public class SchedulingIntegrationTest extends TestCase {
 
         long at = DateTime.now().plusSeconds(3).getMillis();
 
-        baseURL = BaseTestConfig.getBaseUrlBuilder().addPathSegment("schedules")
-                .build();
+        response = scheduleClient.create("true", at);
 
-        request = new Request.Builder().url(baseURL)
-                .post(RequestBody.create(MediaType.parse("application/json"),
-                        "                                           "
-                                + "{                                "
-                                + "    \"atTime\": " + at
-                                + "}                                "))
-                .build();
-        response = client.newCall(request).execute();
-
-        // Store Response Body
         body = response.body().string();
-
-        // Extract element Id
         scheduleId = BaseTestConfig.extractId(body);
 
-        baseURL = BaseTestConfig.getBaseUrlBuilder().addPathSegment("schedules")
-                .addPathSegment(scheduleId).addPathSegment("requests").build();
+        response = requestClient.create(scheduleId, testingTarget);
 
-        request = new Request.Builder().url(baseURL)
-                .post(RequestBody.create(MediaType.parse("application/json"),
-                        "                                                      "
-                                + "{                                           "
-                                + "    \"targetUri\": \"" + testingTarget + "\""
-                                + "}                                           "))
-                .build();
-        response = client.newCall(request).execute();
-
-        // Store Response Body
         body = response.body().string();
-
-        // Extract element Id
         requestId = BaseTestConfig.extractId(body);
 
-        baseURL = BaseTestConfig.getBaseUrlBuilder().addPathSegment("requests")
-                .addPathSegment(requestId).addPathSegment("responses").build();
-
-        request = new Request.Builder().url(baseURL).build();
-        response = client.newCall(request).execute();
-
-        // Store Response Body
+        response = responseClient.list(requestId);
         body = response.body().string();
 
         assertTrue("Responses are not empty!", body.equals("[]"));
@@ -89,22 +56,14 @@ public class SchedulingIntegrationTest extends TestCase {
             Thread.sleep(100);
         }
 
-        request = new Request.Builder().url(baseURL).build();
-        response = client.newCall(request).execute();
-
-        // Store Response Body
+        response = responseClient.list(requestId);
         body = response.body().string();
 
         assertTrue(
                 "Delayed Request didn't work because didn't generate Responses",
                 !body.equals("[]"));
 
-        // Remove schedule TODO: Will it remove in cascade?
-        baseURL = BaseTestConfig.getBaseUrlBuilder().addPathSegment("schedules")
-                .addPathSegment(scheduleId).build();
-        request = new Request.Builder().url(baseURL).delete().build();
-        response = client.newCall(request).execute();
-
+        scheduleClient.delete(scheduleId);
     }
 
     @Test
@@ -113,70 +72,32 @@ public class SchedulingIntegrationTest extends TestCase {
 
         long at = DateTime.now().plusSeconds(3).getMillis();
 
-        baseURL = BaseTestConfig.getBaseUrlBuilder().addPathSegment("schedules")
-                .build();
+        response = scheduleClient.create("true", at);
 
-        request = new Request.Builder().url(baseURL)
-                .post(RequestBody.create(MediaType.parse("application/json"),
-                        "                                           "
-                                + "{                                "
-                                + "    \"atTime\": " + at + ","
-                                + "    \"active\": false"
-                                + "}                                "))
-                .build();
-        response = client.newCall(request).execute();
-
-        // Store Response Body
         body = response.body().string();
-
-        // Extract element Id
         scheduleId = BaseTestConfig.extractId(body);
 
-        baseURL = BaseTestConfig.getBaseUrlBuilder().addPathSegment("schedules")
-                .addPathSegment(scheduleId).addPathSegment("requests").build();
+        response = requestClient.create(scheduleId, testingTarget);
 
-        request = new Request.Builder().url(baseURL)
-                .post(RequestBody.create(MediaType.parse("application/json"),
-                        "                                                      "
-                                + "{                                           "
-                                + "    \"targetUri\": \"" + testingTarget + "\""
-                                + "}                                           "))
-                .build();
-        response = client.newCall(request).execute();
-
-        // Store Response Body
         body = response.body().string();
-
-        // Extract element Id
         requestId = BaseTestConfig.extractId(body);
 
-        baseURL = BaseTestConfig.getBaseUrlBuilder().addPathSegment("requests")
-                .addPathSegment(requestId).addPathSegment("responses").build();
-
-        request = new Request.Builder().url(baseURL).build();
-        response = client.newCall(request).execute();
-
-        // Store Response Body
+        response = responseClient.list(requestId);
         body = response.body().string();
+
+        assertTrue("Responses are not empty!", body.equals("[]"));
 
         while (at + 2000 > DateTime.now().getMillis()) {
             Thread.sleep(100);
         }
 
-        request = new Request.Builder().url(baseURL).build();
-        response = client.newCall(request).execute();
-
-        // Store Response Body
+        response = responseClient.list(requestId);
         body = response.body().string();
 
-        assertTrue("Disabling didn't work because there are responses",
-                body.equals("[]"));
+        assertTrue(
+                "Delayed Request didn't work because there are Responses",
+                !body.equals("[]"));
 
-        // clean db
-        baseURL = BaseTestConfig.getBaseUrlBuilder().addPathSegment("schedules")
-                .addPathSegment(scheduleId).build();
-        request = new Request.Builder().url(baseURL).delete().build();
-        response = client.newCall(request).execute();
-
+        scheduleClient.delete(scheduleId);
     }
 }

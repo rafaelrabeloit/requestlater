@@ -72,12 +72,25 @@ public class ScheduleQueue extends DAOTemplateImpl<Schedule>
 
     @Override
     public Schedule update(Schedule entity) {
-        if (queue.remove(entity) && entity.getActive()) {
-            queue.add(entity);
-            return entity;
-        } else {
-            throw new NoSuchElementException();
+        try {
+            if (!queue.remove(entity)) {
+                LOGGER.warn("There was a problem removing the element. "
+                        + "Continuing...");
+            }
+        } catch (NoSuchElementException e) {
+            LOGGER.info("Trying to update element that is *NOT* on the queue. "
+                    + "It will works like a add because we suppose "
+                    + "that the element could be inactive and not on queue.");
         }
+
+        if (entity.getActive()) {
+            queue.add(entity);
+        } else {
+            LOGGER.warn("Trying to update element that is inactive. "
+                    + "Doing nothing.");
+        }
+
+        return entity;
     }
 
     @Override
