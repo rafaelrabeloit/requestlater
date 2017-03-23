@@ -1,21 +1,27 @@
 package com.neptune.api.requestlater.it;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
+
 import java.io.IOException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockserver.client.server.MockServerClient;
 
 import com.neptune.api.requestlater.client.RequestSimpleClient;
 import com.neptune.api.requestlater.client.ResponseSimpleClient;
 import com.neptune.api.requestlater.client.ScheduleSimpleClient;
 
-import junit.framework.TestCase;
 import okhttp3.Response;
 
-public class ResponseIntegrationTest extends TestCase {
+public class ResponseIntegrationTest {
 
     static final Logger LOGGER = LogManager
             .getLogger(ResponseIntegrationTest.class);
@@ -26,8 +32,6 @@ public class ResponseIntegrationTest extends TestCase {
 
     Response response;
 
-    String testingTarget = BaseTestConfig.getBaseUrlBuilder().build()
-            .toString();
     String body;
 
     String scheduleId;
@@ -37,13 +41,21 @@ public class ResponseIntegrationTest extends TestCase {
     public ResponseIntegrationTest() {
     }
 
+    @BeforeClass
+    public static void configure() {
+        new MockServerClient(BaseTestConfig.TARGET_HOSTNAME,
+                BaseTestConfig.TARGET_HOSTPORT)
+                        .when(request().withMethod("GET").withPath("/"))
+                        .respond(response().withStatusCode(200));
+    }
+
     @Before
     public void setUp() throws IOException {
         response = scheduleClient.create("false", 0);
         body = response.body().string();
         scheduleId = BaseTestConfig.extractId(body);
 
-        response = requestClient.create(scheduleId, testingTarget);
+        response = requestClient.create(scheduleId, BaseTestConfig.TARGET);
         body = response.body().string();
         requestId = BaseTestConfig.extractId(body);
 
@@ -57,10 +69,10 @@ public class ResponseIntegrationTest extends TestCase {
     }
 
     @Test
-    public void test_responseVisibility()
+    public void test_visibilityStatus()
             throws IOException, InterruptedException {
 
-        Thread.sleep(3000);
+        Thread.sleep(BaseTestConfig.TIME_TO_TARGET_RESPOND);
 
         response = client.list(requestId);
         assertEquals("Basic listing of '" + client.testingElement

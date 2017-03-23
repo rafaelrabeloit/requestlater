@@ -1,5 +1,7 @@
 package com.neptune.api.requestlater.it;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 
 import org.apache.logging.log4j.LogManager;
@@ -8,10 +10,9 @@ import org.junit.Test;
 
 import com.neptune.api.requestlater.client.ScheduleSimpleClient;
 
-import junit.framework.TestCase;
 import okhttp3.Response;
 
-public class ScheduleIntegrationTest extends TestCase {
+public class ScheduleIntegrationTest {
 
     static final Logger LOGGER = LogManager
             .getLogger(ScheduleIntegrationTest.class);

@@ -38,6 +38,12 @@ public class RequestSimpleClient {
 
     public Response create(String scheduleId, String target)
             throws IOException {
+        return create(scheduleId, target, "", "", "");
+
+    }
+
+    public Response create(String scheduleId, String target, String headers,
+            String content, String method) throws IOException {
         HttpUrl baseURL = BaseTestConfig.getBaseUrlBuilder()
                 .addPathSegment("schedules").addPathSegment(scheduleId)
                 .addPathSegment(testingElement).build();
@@ -46,6 +52,9 @@ public class RequestSimpleClient {
                 .post(RequestBody.create(MediaType.parse("application/json"),
                         "                                               "
                                 + "{                                    "
+                                + (method.length() == 0 ? "" : "\"method\": \"" + method + "\",")
+                                + (headers.length() == 0 ? "" : "\"headers\": {" + headers + "},")
+                                + (content.length() == 0 ? "" : "\"content\": \"" + content + "\",")
                                 + "    \"targetUri\": \"" + target + "\""
                                 + "}                                    "))
                 .build();

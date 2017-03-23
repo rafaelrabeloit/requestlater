@@ -1,22 +1,29 @@
 package com.neptune.api.requestlater.it;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
+
 import java.io.IOException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockserver.client.server.MockServerClient;
 
 import com.neptune.api.requestlater.client.RequestSimpleClient;
+import com.neptune.api.requestlater.client.ResponseSimpleClient;
 import com.neptune.api.requestlater.client.ScheduleSimpleClient;
 
-import junit.framework.TestCase;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class RequestIntegrationTest extends TestCase {
+public class RequestIntegrationTest {
 
     static final Logger LOGGER = LogManager
             .getLogger(RequestIntegrationTest.class);
@@ -36,10 +43,17 @@ public class RequestIntegrationTest extends TestCase {
     public RequestIntegrationTest() {
     }
 
+    @BeforeClass
+    public static void configure() {
+        new MockServerClient(BaseTestConfig.TARGET_HOSTNAME,
+                BaseTestConfig.TARGET_HOSTPORT)
+                        .when(request().withMethod("POST").withPath("/"))
+                        .respond(response().withStatusCode(200));
+    }
+
     @Before
     public void setUp() throws IOException {
-        response = scheduleClient.create("true",
-                "2999-12-31T00:00:00.000-0000");
+        response = scheduleClient.create("false", 0);
         body = response.body().string();
         scheduleId = BaseTestConfig.extractId(body);
     }
@@ -64,7 +78,7 @@ public class RequestIntegrationTest extends TestCase {
         assertEquals("Basic listing of '" + client.testingElement
                 + "' is not HTTP OK", 200, response.code());
 
-        response = client.create(scheduleId, "http://localhost/");
+        response = client.create(scheduleId, BaseTestConfig.TARGET);
         body = response.body().string();
         assertEquals(
                 "Adding element to '" + client.testingElement
@@ -90,6 +104,33 @@ public class RequestIntegrationTest extends TestCase {
         assertEquals(
                 "Arbitrary Id in '" + client.testingElement + "' is visible!.",
                 404, response.code());
+    }
+
+    @Test
+    public void test_post() throws IOException, InterruptedException {
+        ResponseSimpleClient responseClient = new ResponseSimpleClient();
+
+        response = client.create(scheduleId, BaseTestConfig.TARGET,
+                "\"Content-Type\": \"application/json\"", "{}", "POST");
+        body = response.body().string();
+        id = BaseTestConfig.extractId(body);
+
+        response = scheduleClient.edit(scheduleId, "true", 0);
+        Thread.sleep(BaseTestConfig.TIME_TO_TARGET_RESPOND);
+
+        response = responseClient.list(id);
+        assertEquals(
+                "Basic listing of '" + responseClient.testingElement
+                        + "' is not HTTP OK after inserction",
+                200, response.code());
+
+        // Store Responses Body
+        body = response.body().string();
+
+        assertTrue(
+                "Delayed Request didn't work because didn't generate Responses",
+                !body.equals("[]"));
+
     }
 
 }

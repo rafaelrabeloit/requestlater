@@ -11,7 +11,7 @@ import okhttp3.HttpUrl.Builder;
  */
 public class BaseTestConfig {
 
-    static String HOSTNAME = "10.8.0.101";
+    static String HOSTNAME = "localhost";
     static int HOSTPORT = 8080;
 
     static {
@@ -25,6 +25,12 @@ public class BaseTestConfig {
         }
     }
 
+    static int TARGET_HOSTPORT = 1080;
+    static String TARGET_HOSTNAME = "127.0.0.1";
+    static String TARGET = "http://" + TARGET_HOSTNAME + ":" + TARGET_HOSTPORT;
+
+    static int TIME_TO_TARGET_RESPOND = 1000; //ms
+    
     /**
      * Base URL to run the tests against. It can be the IT server, can be the
      * Staging or Development server.
