@@ -1,6 +1,7 @@
 package com.neptune.api.requestlater.it;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
@@ -23,6 +24,8 @@ public class SchedulingIntegrationTest {
     ScheduleSimpleClient scheduleClient = new ScheduleSimpleClient();
     RequestSimpleClient requestClient = new RequestSimpleClient();
     ResponseSimpleClient responseClient = new ResponseSimpleClient();
+
+    long at = 0;
 
     Response response;
 
@@ -56,13 +59,13 @@ public class SchedulingIntegrationTest {
      * @throws IOException
      * @throws InterruptedException
      */
-    public void prepare(String active)
+    public void prepare(String active, String recurrence)
             throws IOException, InterruptedException {
 
         // schedule request for 3sec from now
-        long at = DateTime.now().plusSeconds(3).getMillis();
+        at = DateTime.now().plusSeconds(3).getMillis();
 
-        response = scheduleClient.create(active, at);
+        response = scheduleClient.create(active, at, recurrence);
 
         body = response.body().string();
         scheduleId = BaseTestConfig.extractId(body);
@@ -75,37 +78,67 @@ public class SchedulingIntegrationTest {
         response = responseClient.list(requestId);
         body = response.body().string();
 
-        assertTrue("Responses are not empty!", body.equals("[]"));
+        assertEquals("Responses are not empty!", "[]", body);
+    }
 
-        while (at + 2000 > DateTime.now().getMillis()) {
+    public void waitResponses(int time)
+            throws InterruptedException, IOException {
+
+        while (at + time > DateTime.now().getMillis()) {
             Thread.sleep(100);
         }
 
         response = responseClient.list(requestId);
         body = response.body().string();
-
     }
 
     @Test
     public void test_checkDelayedResponse()
             throws IOException, InterruptedException {
 
-        prepare("true");
+        prepare("true", "");
 
-        assertTrue(
+        waitResponses(2000);
+
+        assertNotEquals(
                 "Delayed Request didn't work because didn't generate Responses",
-                !body.equals("[]"));
+                "[]", body);
 
     }
+
+//    @Test
+//    public void test_checkDelayedResponseWithRecurrenceRule()
+//            throws IOException, InterruptedException {
+//
+//        // firing every 3 seconds
+//        prepare("true", "RRULE:FREQ=SECONDLY;INTERVAL=3;COUNT=2");
+//
+//        waitResponses(2000);
+//
+//        assertNotEquals(
+//                "The 1st delayed request didn't work because didn't generate "
+//                        + "Responses",
+//                "[]", body);
+//
+//        waitResponses(3000);
+//
+//        assertEquals(
+//                "The 2nd delayed request didn't work because didn't generate "
+//                        + "Responses",
+//                "[]", body);
+//
+//    }
 
     @Test
     public void test_disablingSchedule()
             throws IOException, InterruptedException {
 
-        prepare("false");
+        prepare("false", "");
 
-        assertTrue("Delayed Request didn't work because there are Responses",
-                body.equals("[]"));
+        waitResponses(2000);
+
+        assertEquals("Delayed Request didn't work because there are Responses",
+                "[]", body);
 
     }
 }

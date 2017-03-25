@@ -2,6 +2,7 @@ package com.neptune.api.requestlater.domain;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
+import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -34,11 +35,17 @@ import org.apache.logging.log4j.Logger;
 import org.glassfish.jersey.linking.InjectLink;
 import org.glassfish.jersey.linking.InjectLinkNoFollow;
 import org.glassfish.jersey.linking.InjectLinks;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.neptune.api.requestlater.DataExtractor;
 import com.neptune.api.template.adapter.LinkAdapter;
 import com.neptune.api.template.domain.DomainTemplate;
+
+import com.google.ical.compat.jodatime.DateTimeIterable;
+import com.google.ical.compat.jodatime.DateTimeIterator;
+import com.google.ical.compat.jodatime.DateTimeIteratorFactory;
 
 /**
  * Schedule Model.
@@ -58,6 +65,12 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
 
     private Boolean active;
 
+    private Date ocurrence;
+
+    private String recurrence;
+
+    private Map<String, List<String>> variables;
+
     @InjectLinkNoFollow
     private Set<Request> requests;
 
@@ -67,12 +80,9 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
     @XmlJavaTypeAdapter(LinkAdapter.class)
     private List<Link> links;
 
-    private Map<String, List<String>> variables;
-
     public Schedule() {
         super();
 
-        this.atTime = new Date();
         this.active = Boolean.TRUE;
 
         this.requests = new HashSet<Request>();
@@ -91,7 +101,7 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
     }
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "at_time", nullable = false)
+    @Column(name = "at_time", nullable = true)
     public Date getAtTime() {
         return atTime;
     }
@@ -121,6 +131,28 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
     @Transient
     public Map<String, List<String>> getVariables() {
         return this.variables;
+    }
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "ocurrence", nullable = false)
+    public Date getOcurrence() {
+        if (this.ocurrence == null) {
+            this.ocurrence = new Date();
+        }
+        return this.ocurrence;
+    }
+
+    @Column(name = "recurrence", nullable = true, length = 255)
+    public String getRecurrence() {
+        return recurrence;
+    }
+
+    public void setRecurrence(String recurrence) {
+        this.recurrence = recurrence;
+    }
+
+    public void setOcurrence(Date ocurrence) {
+        this.ocurrence = ocurrence;
     }
 
     public void setActive(Boolean active) {
@@ -155,6 +187,9 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
         for (Request req : this.getRequests()) {
             req.process();
         }
+
+        // calculate the next schedule time based on recurrence rule
+        foresee();
     }
 
     @Override
@@ -187,4 +222,49 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
 
     }
 
+    // TODO: Treat parse exception
+    public void foresee() {
+        if (this.recurrence == null || this.recurrence.length() == 0) {
+            this.setActive(false);
+            return;
+        }
+        
+        DateTime base = new DateTime(this.getOcurrence());
+
+        if (this.atTime != null
+                && this.atTime.getTime() > DateTime.now().getMillis())
+            // if the foreseen time is still to come, then it is still valid
+            return;
+
+        if (this.recurrence != null) {
+            try {
+                DateTimeIterable range = DateTimeIteratorFactory
+                        .createDateTimeIterable(this.recurrence, base,
+                                DateTimeZone.UTC, true);
+                DateTimeIterator it = range.iterator();
+
+                base = null;
+                while (it.hasNext()) {
+                    base = it.next();
+                    if (base != null && !base.isBeforeNow())
+                        break;
+                }
+
+                if (base != null) {
+                    // turns this time in the last occurrence
+                    if (this.atTime != null)
+                        this.ocurrence = this.atTime;
+
+                    // the schedule is the next time
+                    this.atTime = new Date(base.getMillis());
+                } else {
+                    // If there is NOT another iteration for this watcher, then
+                    // disable it!
+                    this.active = false;
+                }
+            } catch (ParseException e) {
+                System.out.print(e);
+            }
+        }
+    }
 }

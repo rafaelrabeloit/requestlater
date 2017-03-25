@@ -29,15 +29,21 @@ public class ScheduleSimpleClient {
         return response;
     }
 
+    public Response create(String active, long at, String recurrence)
+            throws IOException {
+        return createBase(active, String.valueOf(at), recurrence);
+    }
+
     public Response create(String active, String at) throws IOException {
-        return createBase(active, "\"" + at + "\"");
+        return createBase(active, "\"" + at + "\"", "");
     }
 
     public Response create(String active, long at) throws IOException {
-        return createBase(active, String.valueOf(at));
+        return createBase(active, String.valueOf(at), "");
     }
 
-    private Response createBase(String active, String at) throws IOException {
+    private Response createBase(String active, String at, String recurrence)
+            throws IOException {
         HttpUrl baseURL = BaseTestConfig.getBaseUrlBuilder()
                 .addPathSegment(testingElement).build();
 
@@ -46,7 +52,8 @@ public class ScheduleSimpleClient {
                         "                                         "
                                 + "{                              "
                                 + "    \"atTime\": " + at + ","
-                                + "    \"active\": " + active + " "
+                                + "    \"active\": " + active + ","
+                                + "    \"recurrence\": \"" + recurrence + "\" "
                                 + "}                              "))
                 .build();
         Response response = client.newCall(request).execute();

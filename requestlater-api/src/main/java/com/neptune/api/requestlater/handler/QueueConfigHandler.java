@@ -42,6 +42,7 @@ public class QueueConfigHandler implements ApplicationEventListener {
             queue.setOnTimeListener(new OnTimeListener<Schedule>() {
                 @Override
                 public void onTime(Schedule e) {
+                    queue.update(e);
                     schedules.update(e);
                     LOGGER.debug(e + " finished");
                 }

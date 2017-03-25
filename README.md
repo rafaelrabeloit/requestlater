@@ -36,7 +36,26 @@ to run integration tests
   
 Use 
 `mvn clean site install && mvn cargo:redeploy -pl :requestlater-api`  
+to deploy the api
   
 Use 
 `mvn clean help:evaluate -Dexpression=project.version | grep -v "^\["` 
-to get project version  
+to get project version
+  
+Note that on Jenkins, we have the following logic:  
+  
+    version=$(mvn clean help:evaluate -Dexpression=project.version | grep -v "^\["); 
+    
+    if [[ $version == *-SNAPSHOT* ]]; 
+    then 
+	    env=staging; 
+    else 
+	    env=production; 
+    fi;
+    
+    mvn clean site install -Denvironment=$env && mvn cargo:redeploy -pl :requestlater-api -Denvironment=$env;
+  
+That means that SNAPSHOT versions are going to be deployed to staging. Other 
+versions are going to be considered stable and deployed to production.  
+This allow Continuous Integration and Continuous Delivery, for the later is 
+just a matter of never use snapshot versions.  

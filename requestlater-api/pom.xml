@@ -49,6 +49,12 @@
 			<artifactId>delayedqueue</artifactId>
 		</dependency>
 
+
+		<dependency>
+			<groupId>org.scala-saddle</groupId>
+			<artifactId>google-rfc-2445</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>joda-time</groupId>
 			<artifactId>joda-time</artifactId>
@@ -343,7 +349,8 @@
 								<replaceregexp
 									match='(&lt;[\s]*?persistence-unit[\s]*? name="[a-zA-Z_.-]*?-test"[\s\S^>]*?&gt;[\s\S]*?&lt;[\s]*?\/[\s]*?persistence-unit[\s]*?&gt;)'
 									replace="">
-									<fileset dir="${project.build.outputDirectory}" includes="**/persistence.xml" />
+									<fileset dir="${project.build.outputDirectory}"
+										includes="**/persistence.xml" />
 								</replaceregexp>
 							</target>
 						</configuration>

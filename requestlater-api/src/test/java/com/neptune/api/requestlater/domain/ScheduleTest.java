@@ -2,11 +2,14 @@ package com.neptune.api.requestlater.domain;
 
 import static org.junit.Assert.assertEquals;
 
+import java.text.ParseException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -30,8 +33,7 @@ public class ScheduleTest extends Mockito {
         EXPECTED.put("Set-Cookie", Arrays.asList(
                 "ASPSESSIONIDQQBRBRQQ=OBFMDAPDCOILJABKPEHNPLJD; path=/"));
         EXPECTED.put("X-Powered-By", Arrays.asList("ASP.NET"));
-        EXPECTED.put("Date",
-                Arrays.asList("Mon, 20 Mar 2017 20:53:02 GMT"));
+        EXPECTED.put("Date", Arrays.asList("Mon, 20 Mar 2017 20:53:02 GMT"));
 
         EXPECTED.put("FIRST-DATE", Arrays.asList("01 de janeiro"));
     }
@@ -68,6 +70,67 @@ public class ScheduleTest extends Mockito {
                     schedule.getVariables().get(key).toString());
         });
 
+    }
+
+    @Test
+    public void test_foresee_simple() throws ParseException {
+
+        Schedule schedule = new Schedule();
+
+        schedule.setRecurrence("RRULE:FREQ=MINUTELY;");
+        schedule.foresee();
+
+        assertEquals(
+                DateTime.now().plusMinutes(1).withMillisOfSecond(0)
+                        .withSecondOfMinute(0).toString(),
+                new DateTime(schedule.getAtTime()).withMillisOfSecond(0)
+                        .withSecondOfMinute(0).toString());
+
+    }
+
+    @Test
+    public void test_foresee_interval() throws ParseException {
+
+        Schedule schedule = new Schedule();
+
+        schedule.setRecurrence("RRULE:INTERVAL=2;FREQ=MINUTELY;");
+        schedule.foresee();
+
+        assertEquals(
+                DateTime.now().plusMinutes(2).withMillisOfSecond(0)
+                        .withSecondOfMinute(0).toString(),
+                new DateTime(schedule.getAtTime()).withMillisOfSecond(0)
+                        .withSecondOfMinute(0).toString());
+
+    }
+
+    @Test
+    public void test_foresee_intervalBy2WithOcurrence() throws ParseException {
+
+        Schedule schedule = new Schedule();
+
+        schedule.setOcurrence(DateTime.now().minusMinutes(1)
+                .withMillisOfSecond(0).withSecondOfMinute(0).toDate());
+        schedule.setRecurrence("RRULE:INTERVAL=2;FREQ=MINUTELY;");
+        schedule.foresee();
+
+        assertEquals("Scheduling time dont match in the 1st occurrence",
+                DateTime.now().plusMinutes(1).withMillisOfSecond(0)
+                        .withSecondOfMinute(0).toString(),
+                new DateTime(schedule.getAtTime()).toString());
+
+        DateTimeUtils.setCurrentMillisOffset(1 * 60 * 1000);
+        schedule.foresee();
+
+        assertEquals("Scheduling time dont match in the 1st occurrence",
+                DateTime.now().withMillisOfSecond(0).withSecondOfMinute(0)
+                        .toString(),
+                new DateTime(schedule.getOcurrence()).toString());
+
+        assertEquals("Scheduling time dont match in the 2nd occurrence",
+                DateTime.now().plusMinutes(2).withMillisOfSecond(0)
+                        .withSecondOfMinute(0).toString(),
+                new DateTime(schedule.getAtTime()).toString());
     }
 
 }

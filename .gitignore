@@ -5,6 +5,7 @@
 /*/.dropbox
 /*/.project
 /*/desktop.ini
+/*/logs/
 
 target/
 build/
@@ -13,3 +14,5 @@ build/
 .dropbox
 .project
 desktop.ini
+
+*.log
