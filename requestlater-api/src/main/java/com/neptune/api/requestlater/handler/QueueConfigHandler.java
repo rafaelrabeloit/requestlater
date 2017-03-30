@@ -42,9 +42,13 @@ public class QueueConfigHandler implements ApplicationEventListener {
             queue.setOnTimeListener(new OnTimeListener<Schedule>() {
                 @Override
                 public void onTime(Schedule e) {
+                    // try to update on queue, in case run choose another time
+                    // for it
                     queue.update(e);
+                    // update on db
                     schedules.update(e);
-                    LOGGER.debug(e + " finished");
+                    
+                    LOGGER.debug("Processing of " + e + " finished");
                 }
 
                 @Override

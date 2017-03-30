@@ -53,7 +53,8 @@ public class RequestIntegrationTest {
 
     @Before
     public void setUp() throws IOException {
-        response = scheduleClient.create("false", 0);
+        response = scheduleClient.create("false",
+                "1999-12-31T00:00:00.000-0000");
         body = response.body().string();
         scheduleId = BaseTestConfig.extractId(body);
     }
@@ -115,7 +116,8 @@ public class RequestIntegrationTest {
         body = response.body().string();
         id = BaseTestConfig.extractId(body);
 
-        response = scheduleClient.edit(scheduleId, "true", 0);
+        response = scheduleClient.edit(scheduleId, "true",
+                "1999-12-31T00:00:00.000-0000");
         Thread.sleep(BaseTestConfig.TIME_TO_TARGET_RESPOND);
 
         response = responseClient.list(id);

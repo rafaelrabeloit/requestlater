@@ -1,6 +1,8 @@
 package com.neptune.api.requestlater.domain;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.text.ParseException;
 import java.util.Arrays;
@@ -36,6 +38,8 @@ public class ScheduleTest extends Mockito {
         EXPECTED.put("Date", Arrays.asList("Mon, 20 Mar 2017 20:53:02 GMT"));
 
         EXPECTED.put("FIRST-DATE", Arrays.asList("01 de janeiro"));
+
+        DateTimeUtils.setCurrentMillisSystem();
     }
 
     @Test
@@ -77,14 +81,55 @@ public class ScheduleTest extends Mockito {
 
         Schedule schedule = new Schedule();
 
-        schedule.setRecurrence("RRULE:FREQ=MINUTELY;");
-        schedule.foresee();
+        schedule.setAt("RRULE:FREQ=MINUTELY;");
 
         assertEquals(
                 DateTime.now().plusMinutes(1).withMillisOfSecond(0)
                         .withSecondOfMinute(0).toString(),
-                new DateTime(schedule.getAtTime()).withMillisOfSecond(0)
+                new DateTime(schedule.getIncomingTime()).withMillisOfSecond(0)
                         .withSecondOfMinute(0).toString());
+
+    }
+
+    @Test
+    public void test_foresee_simpleWithMultipleFires() throws ParseException {
+
+        Schedule schedule = new Schedule();
+
+        schedule.setAt("RRULE:FREQ=MINUTELY;");
+
+        assertTrue("Scheduling time dont match in the 1st occurrence",
+                Math.abs(schedule.getIncomingTime().getTime()
+                        - DateTime.now().plusMinutes(1).getMillis()) < 1000);
+
+        assertNull("last time not invalid before first fire",
+                schedule.getLastTime());
+
+        // offset by one min
+        DateTimeUtils.setCurrentMillisOffset(1 * 60 * 1000);
+        // and foresee next
+        schedule.nextIncomingTime();
+
+        assertTrue("Failed to set last time that fire to now",
+                Math.abs(schedule.getLastTime().getTime()
+                        - DateTime.now().getMillis()) < 1000);
+
+        assertTrue("Scheduling time dont match in the 2nd occurrence",
+                Math.abs(schedule.getIncomingTime().getTime()
+                        - DateTime.now().plusMinutes(1).getMillis()) < 1000);
+
+        // offset by one min
+        DateTimeUtils.setCurrentMillisOffset(1 * 60 * 1000);
+        // and foresee next
+        schedule.nextIncomingTime();
+
+        assertTrue("Failed to set last time that fire to now",
+                Math.abs(schedule.getLastTime().getTime()
+                        - DateTime.now().getMillis()) < 1000);
+
+        assertTrue("Scheduling time dont match in the 3rd occurrence",
+                Math.abs(schedule.getIncomingTime().getTime()
+                        - DateTime.now().plusMinutes(1).getMillis()) < 1000);
 
     }
 
@@ -93,13 +138,12 @@ public class ScheduleTest extends Mockito {
 
         Schedule schedule = new Schedule();
 
-        schedule.setRecurrence("RRULE:INTERVAL=2;FREQ=MINUTELY;");
-        schedule.foresee();
+        schedule.setAt("RRULE:INTERVAL=2;FREQ=MINUTELY;");
 
         assertEquals(
                 DateTime.now().plusMinutes(2).withMillisOfSecond(0)
                         .withSecondOfMinute(0).toString(),
-                new DateTime(schedule.getAtTime()).withMillisOfSecond(0)
+                new DateTime(schedule.getIncomingTime()).withMillisOfSecond(0)
                         .withSecondOfMinute(0).toString());
 
     }
@@ -109,28 +153,26 @@ public class ScheduleTest extends Mockito {
 
         Schedule schedule = new Schedule();
 
-        schedule.setOcurrence(DateTime.now().minusMinutes(1)
-                .withMillisOfSecond(0).withSecondOfMinute(0).toDate());
-        schedule.setRecurrence("RRULE:INTERVAL=2;FREQ=MINUTELY;");
-        schedule.foresee();
+        schedule.setAt("RRULE:INTERVAL=2;FREQ=MINUTELY;");
 
-        assertEquals("Scheduling time dont match in the 1st occurrence",
-                DateTime.now().plusMinutes(1).withMillisOfSecond(0)
-                        .withSecondOfMinute(0).toString(),
-                new DateTime(schedule.getAtTime()).toString());
+        assertTrue(
+                "Scheduling time " + schedule.getIncomingTime()
+                        + " dont match in the 1st occurrence",
+                Math.abs(schedule.getIncomingTime().getTime()
+                        - DateTime.now().plusMinutes(2).getMillis()) < 1000);
 
-        DateTimeUtils.setCurrentMillisOffset(1 * 60 * 1000);
-        schedule.foresee();
+        // offset by two min
+        DateTimeUtils.setCurrentMillisOffset(2 * 60 * 1000);
+        // and foresee next
+        schedule.nextIncomingTime();
 
-        assertEquals("Scheduling time dont match in the 1st occurrence",
-                DateTime.now().withMillisOfSecond(0).withSecondOfMinute(0)
-                        .toString(),
-                new DateTime(schedule.getOcurrence()).toString());
+        assertTrue("Failed to set last time that fire to now",
+                Math.abs(schedule.getLastTime().getTime()
+                        - DateTime.now().getMillis()) < 1000);
 
-        assertEquals("Scheduling time dont match in the 2nd occurrence",
-                DateTime.now().plusMinutes(2).withMillisOfSecond(0)
-                        .withSecondOfMinute(0).toString(),
-                new DateTime(schedule.getAtTime()).toString());
+        assertTrue("Scheduling time dont match in the 2nd occurrence",
+                Math.abs(schedule.getIncomingTime().getTime()
+                        - DateTime.now().plusMinutes(2).getMillis()) < 1000);
     }
 
 }

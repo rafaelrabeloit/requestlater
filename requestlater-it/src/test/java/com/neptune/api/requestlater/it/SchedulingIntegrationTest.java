@@ -7,6 +7,7 @@ import static org.mockserver.model.HttpResponse.response;
 
 import java.io.IOException;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.BeforeClass;
@@ -24,8 +25,6 @@ public class SchedulingIntegrationTest {
     ScheduleSimpleClient scheduleClient = new ScheduleSimpleClient();
     RequestSimpleClient requestClient = new RequestSimpleClient();
     ResponseSimpleClient responseClient = new ResponseSimpleClient();
-
-    long at = 0;
 
     Response response;
 
@@ -59,13 +58,10 @@ public class SchedulingIntegrationTest {
      * @throws IOException
      * @throws InterruptedException
      */
-    public void prepare(String active, String recurrence)
+    public void prepare(String active, String at)
             throws IOException, InterruptedException {
 
-        // schedule request for 3sec from now
-        at = DateTime.now().plusSeconds(3).getMillis();
-
-        response = scheduleClient.create(active, at, recurrence);
+        response = scheduleClient.create(active, at);
 
         body = response.body().string();
         scheduleId = BaseTestConfig.extractId(body);
@@ -81,10 +77,10 @@ public class SchedulingIntegrationTest {
         assertEquals("Responses are not empty!", "[]", body);
     }
 
-    public void waitResponses(int time)
+    public void waitResponses(DateTime until)
             throws InterruptedException, IOException {
 
-        while (at + time > DateTime.now().getMillis()) {
+        while (until.isAfterNow()) {
             Thread.sleep(100);
         }
 
@@ -96,9 +92,11 @@ public class SchedulingIntegrationTest {
     public void test_checkDelayedResponse()
             throws IOException, InterruptedException {
 
-        prepare("true", "");
+        DateTime at = DateTime.now().plusSeconds(3);
 
-        waitResponses(2000);
+        prepare("true", at.toString());
+
+        waitResponses(at.plusSeconds(1));
 
         assertNotEquals(
                 "Delayed Request didn't work because didn't generate Responses",
@@ -106,36 +104,45 @@ public class SchedulingIntegrationTest {
 
     }
 
-//    @Test
-//    public void test_checkDelayedResponseWithRecurrenceRule()
-//            throws IOException, InterruptedException {
-//
-//        // firing every 3 seconds
-//        prepare("true", "RRULE:FREQ=SECONDLY;INTERVAL=3;COUNT=2");
-//
-//        waitResponses(2000);
-//
-//        assertNotEquals(
-//                "The 1st delayed request didn't work because didn't generate "
-//                        + "Responses",
-//                "[]", body);
-//
-//        waitResponses(3000);
-//
-//        assertEquals(
-//                "The 2nd delayed request didn't work because didn't generate "
-//                        + "Responses",
-//                "[]", body);
-//
-//    }
+    @Test
+    public void test_checkDelayedResponseWithRecurrenceRule()
+            throws IOException, InterruptedException {
+
+        DateTime at = DateTime.now().plusSeconds(3);
+
+        // firing every 3 seconds
+        prepare("true", "RRULE:FREQ=SECONDLY;INTERVAL=3;COUNT=2");
+
+        waitResponses(at.plusSeconds(2));
+
+        assertNotEquals(
+                "The 1st delayed request didn't work because didn't generate "
+                        + "Responses",
+                "[]", body);
+
+        assertEquals("There was an incorrect number of responses", 1,
+                StringUtils.countMatches(body, "id"));
+
+        waitResponses(at.plusSeconds(2 + (3 + 2)));
+
+        assertNotEquals(
+                "The 2nd delayed request didn't work because didn't generate "
+                        + "Responses",
+                "[]", body);
+
+        assertEquals("There was an incorrect number of responses", 2,
+                StringUtils.countMatches(body, "id"));
+    }
 
     @Test
     public void test_disablingSchedule()
             throws IOException, InterruptedException {
 
-        prepare("false", "");
+        DateTime at = DateTime.now().plusSeconds(3);
 
-        waitResponses(2000);
+        prepare("false", at.toString());
+
+        waitResponses(at.plusSeconds(1));
 
         assertEquals("Delayed Request didn't work because there are Responses",
                 "[]", body);

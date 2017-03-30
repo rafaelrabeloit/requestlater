@@ -41,6 +41,7 @@ public class ScheduleQueue extends DAOTemplateImpl<Schedule>
      */
     public void stop() {
         try {
+            LOGGER.debug("Stopping queue");
             this.queue.stop();
         } catch (InterruptedException e) {
             LOGGER.error("Queue Stop was Interrupted!", e);
@@ -59,8 +60,11 @@ public class ScheduleQueue extends DAOTemplateImpl<Schedule>
 
     @Override
     public Schedule create(Schedule entity) {
+        LOGGER.debug("Creating element " + entity + " on queue");
         if (entity.getActive()) {
             queue.add(entity);
+        } else {
+            LOGGER.debug("Element was inactive");
         }
         return entity;
     }

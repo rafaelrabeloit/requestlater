@@ -29,20 +29,15 @@ public class ScheduleSimpleClient {
         return response;
     }
 
-    public Response create(String active, long at, String recurrence)
-            throws IOException {
-        return createBase(active, String.valueOf(at), recurrence);
-    }
-
     public Response create(String active, String at) throws IOException {
-        return createBase(active, "\"" + at + "\"", "");
+        return createBase(active, "\"" + at + "\"");
     }
 
-    public Response create(String active, long at) throws IOException {
-        return createBase(active, String.valueOf(at), "");
-    }
+//    public Response create(String active, long at) throws IOException {
+//        return createBase(active, String.valueOf(at));
+//    }
 
-    private Response createBase(String active, String at, String recurrence)
+    private Response createBase(String active, String at)
             throws IOException {
         HttpUrl baseURL = BaseTestConfig.getBaseUrlBuilder()
                 .addPathSegment(testingElement).build();
@@ -51,9 +46,8 @@ public class ScheduleSimpleClient {
                 .post(RequestBody.create(MediaType.parse("application/json"),
                         "                                         "
                                 + "{                              "
-                                + "    \"atTime\": " + at + ","
                                 + "    \"active\": " + active + ","
-                                + "    \"recurrence\": \"" + recurrence + "\" "
+                                + "    \"at\": " + at + "         "
                                 + "}                              "))
                 .build();
         Response response = client.newCall(request).execute();
@@ -83,9 +77,9 @@ public class ScheduleSimpleClient {
         return editBase(id, active, "\"" + at + "\"");
     }
 
-    public Response edit(String id, String active, long at) throws IOException {
-        return editBase(id, active, String.valueOf(at));
-    }
+//    public Response edit(String id, String active, long at) throws IOException {
+//        return editBase(id, active, String.valueOf(at));
+//    }
 
     private Response editBase(String id, String active, String at)
             throws IOException {
@@ -96,8 +90,8 @@ public class ScheduleSimpleClient {
                 .put(RequestBody.create(MediaType.parse("application/json"),
                         "                                         "
                                 + "{                              "
-                                + "    \"atTime\": " + at + ","
-                                + "    \"active\": " + active + " "
+                                + "    \"active\": " + active + ","
+                                + "    \"at\": " + at + "         "
                                 + "}                              "))
                 .build();
         Response response = client.newCall(request).execute();

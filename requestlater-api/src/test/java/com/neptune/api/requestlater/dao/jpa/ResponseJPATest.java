@@ -55,7 +55,7 @@ public class ResponseJPATest extends Mockito {
         ResponseJPA responses = new ResponseJPA();
         responses.em = em;
 
-        Schedule schedule = new Schedule();
+        Schedule schedule = new Schedule("2000-01-01T00:00:00.000-0000");
         schedules.create(schedule);
 
         Request request = new Request();

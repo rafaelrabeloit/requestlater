@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -15,6 +16,8 @@ import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -37,6 +40,8 @@ import org.glassfish.jersey.linking.InjectLinkNoFollow;
 import org.glassfish.jersey.linking.InjectLinks;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.joda.time.chrono.ISOChronology;
+import org.joda.time.format.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.neptune.api.requestlater.DataExtractor;
@@ -53,6 +58,7 @@ import com.google.ical.compat.jodatime.DateTimeIteratorFactory;
  * @author Rafael R. Itajuba
  */
 @Entity
+@Access(AccessType.FIELD)
 @Table(name = "_schedules")
 @XmlRootElement
 public class Schedule extends DomainTemplate implements Delayed, Runnable {
@@ -61,23 +67,39 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
 
     static final Logger LOGGER = LogManager.getLogger(Schedule.class);
 
-    private Date atTime;
+    // time for this schedule to fire
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "incoming_time", nullable = true)
+    private Date incomingTime;
 
+    // the last time it was fired
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "last_time", nullable = true)
+    private Date lastTime;
+
+    // if it is active at the moment or not
+    @Column(name = "active", nullable = false)
     private Boolean active;
 
-    private Date ocurrence;
+    // the rule for this scheduling
+    @Column(name = "at", nullable = false, length = 255)
+    private String at;
 
-    private String recurrence;
-
+    // variables for this schedule
+    @Transient
     private Map<String, List<String>> variables;
 
+    // request associates to it
     @InjectLinkNoFollow
+    @OneToMany(mappedBy = "schedule", targetEntity = Request.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<Request> requests;
 
+    // links for HATEOAS
     @InjectLinks({
             @InjectLink(value = "schedules/${instance.id}", rel = "self"),
             @InjectLink(value = "schedules/${instance.id}/requests", rel = "requests") })
     @XmlJavaTypeAdapter(LinkAdapter.class)
+    @Transient
     private List<Link> links;
 
     public Schedule() {
@@ -95,76 +117,105 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
         this.setId(id);
     }
 
-    @Column(name = "active", nullable = false)
+    public Schedule(String at) {
+        this();
+
+        this.setAt(at);
+    }
+
     public Boolean getActive() {
-        return active;
+        return this.active;
     }
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "at_time", nullable = true)
-    public Date getAtTime() {
-        return atTime;
+    public void setActive(Boolean value) {
+        this.active = value;
+        if (!this.active) {
+            this.incomingTime = null;
+        }
     }
 
-    @Transient
-    @XmlElement(name = "_links")
-    public List<Link> getLinks() {
-        return links;
+    /**
+     * Get the closes time that this schedule is appointed for. Null if this
+     * schedule is inactive. Read-only by the API.
+     * 
+     * @return Date when this schedule should fire. Null if it is inactive.
+     */
+    public Date getIncomingTime() {
+        return this.incomingTime;
     }
 
-    @Override
-    @XmlTransient
-    public long getDelay(TimeUnit unit) {
-        return unit.convert(atTime.getTime() - System.currentTimeMillis(),
-                MILLISECONDS);
+    /**
+     * Get the last time that this schedule was fired. Read-only by the API.
+     * 
+     * @return Date when this schedule last fired. Null if there was none.
+     */
+    public Date getLastTime() {
+        return this.lastTime;
     }
 
-    @OneToMany(mappedBy = "schedule", targetEntity = Request.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    public String getAt() {
+        return this.at;
+    }
+
+    /**
+     * Set 'at' value for this schedule. Can be a simple date or a full RRule.
+     * It will fire the calculation of IncomingTime and make LastTime null.
+     * 
+     * @param value
+     *            RRule or date saying when this schedule is appointed for.
+     */
+    public void setAt(String value) {
+        this.at = value;
+        this.lastTime = null;
+
+        if (this.at == null || this.at.length() == 0) {
+            this.setActive(false);
+            return;
+        }
+
+        if (value.startsWith("RRULE:")) {
+            this.nextIncomingTime();
+        } else {
+            this.incomingTime = DateTimeFormat
+                    .forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ")
+                    .withLocale(Locale.ROOT)
+                    .withChronology(ISOChronology.getInstanceUTC())
+                    .parseDateTime(value).toDate();
+        }
+    }
+
     @XmlTransient
     @JsonIgnore
     public Set<Request> getRequests() {
         return this.requests;
     }
 
+    public void setRequests(Set<Request> set) {
+        this.requests = set;
+    }
+
+    /**
+     * Get the map of variables associated with this schedule.
+     * 
+     * @return The map with all variable names pointing to a list of possible
+     *         values
+     */
     @XmlTransient
     @JsonIgnore
-    @Transient
     public Map<String, List<String>> getVariables() {
         return this.variables;
     }
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "ocurrence", nullable = false)
-    public Date getOcurrence() {
-        if (this.ocurrence == null) {
-            this.ocurrence = new Date();
-        }
-        return this.ocurrence;
+    @XmlElement(name = "_links")
+    public List<Link> getLinks() {
+        return this.links;
     }
 
-    @Column(name = "recurrence", nullable = true, length = 255)
-    public String getRecurrence() {
-        return recurrence;
-    }
-
-    public void setRecurrence(String recurrence) {
-        this.recurrence = recurrence;
-    }
-
-    public void setOcurrence(Date ocurrence) {
-        this.ocurrence = ocurrence;
-    }
-
-    public void setActive(Boolean active) {
-        this.active = active;
-    }
-
-    public void setAtTime(Date atTime) {
-        this.atTime = atTime;
-    }
-
-    public void setRequests(Set<Request> requests) {
-        this.requests = requests;
+    @XmlTransient
+    @Override
+    public long getDelay(TimeUnit unit) {
+        return unit.convert(incomingTime.getTime() - System.currentTimeMillis(),
+                MILLISECONDS);
     }
 
     @Override
@@ -189,13 +240,15 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
         }
 
         // calculate the next schedule time based on recurrence rule
-        foresee();
+        nextIncomingTime();
     }
 
     @Override
     public String toString() {
-        return "Schedule [id=" + this.getId() + ", createdOn="
-                + this.getCreatedOn() + ", at=" + atTime + "]";
+        return "Schedule [incomingTime=" + incomingTime + ", lastTime="
+                + lastTime + ", active=" + active + ", at=" + at
+                + ", variables=" + variables + ", getId()=" + getId()
+                + ", getCreatedOn()=" + getCreatedOn() + "]";
     }
 
     /**
@@ -222,49 +275,96 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
 
     }
 
-    // TODO: Treat parse exception
-    public void foresee() {
-        if (this.recurrence == null || this.recurrence.length() == 0) {
+    public void nextIncomingTime() {
+        LOGGER.trace("nextIncomingTime {");
+
+        if (!this.getActive()) {
+            LOGGER.warn("Trying to get nextIncoming time of "
+                    + "*deactivated element*.");
+            LOGGER.trace("nextIncomingTime }");
+            return;
+        }
+
+        if (this.at == null || this.at.length() == 0) {
             this.setActive(false);
+            LOGGER.warn("Trying to get nextIncoming time of "
+                    + "*element without at property*. "
+                    + "Element deactivated.");
+            LOGGER.trace("nextIncomingTime }");
             return;
         }
-        
-        DateTime base = new DateTime(this.getOcurrence());
 
-        if (this.atTime != null
-                && this.atTime.getTime() > DateTime.now().getMillis())
-            // if the foreseen time is still to come, then it is still valid
+        // if the foreseen time is still to come, then it is still valid and use
+        // it instead
+        if (this.incomingTime != null && this.incomingTime.getTime() > DateTime
+                .now().withMillisOfSecond(0).getMillis()) {
+            LOGGER.debug("incomingTime " + incomingTime + " still valid. "
+                    + "Keep using it.");
+            LOGGER.trace("nextIncomingTime }");
             return;
+        }
 
-        if (this.recurrence != null) {
-            try {
-                DateTimeIterable range = DateTimeIteratorFactory
-                        .createDateTimeIterable(this.recurrence, base,
-                                DateTimeZone.UTC, true);
-                DateTimeIterator it = range.iterator();
+        // if it is NOT a RRule, we must deactivate
+        if (!this.at.startsWith("RRULE:")) {
+            this.setActive(false);
+            LOGGER.warn("Trying to get nextIncoming time of "
+                    + "*that is not a recurrence rule*. "
+                    + "Element deactivated.");
+            LOGGER.trace("nextIncomingTime }");
+            return;
+        }
 
-                base = null;
-                while (it.hasNext()) {
-                    base = it.next();
-                    if (base != null && !base.isBeforeNow())
-                        break;
-                }
+        // if last time is null, then base is 'now'
+        DateTime base = new DateTime(this.getLastTime()).withMillisOfSecond(0);
 
-                if (base != null) {
-                    // turns this time in the last occurrence
-                    if (this.atTime != null)
-                        this.ocurrence = this.atTime;
+        try {
+            // generate a iteratable range of date times
+            DateTimeIterable range = DateTimeIteratorFactory
+                    .createDateTimeIterable(this.at, base, DateTimeZone.UTC,
+                            true);
 
-                    // the schedule is the next time
-                    this.atTime = new Date(base.getMillis());
+            // get an iterator to range of date times
+            DateTimeIterator it = range.iterator();
+
+            // iterate until a date that is greater than now and not null
+            base = null;
+            while (it.hasNext()) {
+                base = it.next();
+                LOGGER.debug("next it " + base);
+                DateTime now = DateTime.now().plusSeconds(1)
+                        .withMillisOfSecond(0);
+                if (base != null && base.isAfter(now)) {
+                    LOGGER.debug("base found at " + base + " as after " + now);
+                    break;
                 } else {
-                    // If there is NOT another iteration for this watcher, then
-                    // disable it!
-                    this.active = false;
+                    base = null;
                 }
-            } catch (ParseException e) {
-                System.out.print(e);
             }
+
+            // if base is null, then we are out of dates
+            if (base != null) {
+                // turns this time in the last occurrence
+                if (this.incomingTime != null) {
+                    this.lastTime = this.incomingTime;
+                    LOGGER.debug(
+                            "Making " + this.incomingTime + " the last time");
+                }
+
+                // the schedule is the next time
+                this.incomingTime = base.toDate();
+                LOGGER.debug("New incomingTime is " + this.incomingTime);
+            } else {
+                // If there is NOT another iteration for this watcher, then
+                // disable it!
+                this.setActive(false);
+                LOGGER.debug("No more elements in the RRule. Deactivating.");
+            }
+        } catch (ParseException e) {
+            LOGGER.error("There was an error parsing '" + this.at + "'. "
+                    + "Deactivating.");
+            this.setActive(false);
         }
+
+        LOGGER.trace("nextIncomingTime }");
     }
 }
