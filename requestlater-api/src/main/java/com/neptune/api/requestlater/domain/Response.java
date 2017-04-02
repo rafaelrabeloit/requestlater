@@ -105,7 +105,7 @@ public class Response extends DomainTemplate {
     /**
      * Constructor with id. TODO: Should be on api-template?
      * 
-     * @param id
+     * @param id for this element
      */
     public Response(UUID id) {
         this();
@@ -184,7 +184,7 @@ public class Response extends DomainTemplate {
     /**
      * Set the parent object of this element. TODO: should be removed?
      * 
-     * @param value
+     * @param request
      *            The parent object
      */
     public void setRequest(Request request) {

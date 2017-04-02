@@ -136,7 +136,7 @@ public class Request extends DomainTemplate implements Comparable<Request> {
     /**
      * Constructor with id. TODO: Should be on api-template?
      * 
-     * @param id
+     * @param id for this element
      */
     public Request(UUID id) {
         this();
