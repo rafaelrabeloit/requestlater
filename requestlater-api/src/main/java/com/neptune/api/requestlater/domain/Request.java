@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -55,6 +57,7 @@ import com.neptune.api.template.domain.DomainTemplate;
  * @author Rafael R. Itajuba
  */
 @Entity
+@Access(AccessType.FIELD)
 @Table(name = "_requests")
 @XmlRootElement
 public class Request extends DomainTemplate implements Comparable<Request> {
@@ -63,19 +66,47 @@ public class Request extends DomainTemplate implements Comparable<Request> {
 
     static final Logger LOGGER = LogManager.getLogger(Request.class);
 
-    private Map<String, String> headers;
-    private HttpMethods method;
+    // target that will receive this request
+    @Column(name = "target_uri")
     private String targetUri;
+
+    // method that should be used
+    @Column
+    private HttpMethods method;
+
+    // content that must be used
+    @Column(length = 1024 * 128, nullable = true)
     private String content;
+
+    // priority for this request is a priority queue
+    @Column
     private Integer priority;
 
+    // headers that must be included in the request
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Column(name = "value")
+    @CollectionTable(name = "_request_headers", joinColumns = @JoinColumn(name = "request_id"))
+    private Map<String, String> headers;
+
+    // rules that must be used to extract data from its responses
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Column(name = "rule")
+    @CollectionTable(name = "_request_extractors", joinColumns = @JoinColumn(name = "request_id"))
     private Map<String, String> extractors;
 
+    // responses (children)
     @InjectLinkNoFollow
+    @OneToMany(mappedBy = "request", targetEntity = Response.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Response> responses;
 
+    // parent
     @InjectLinkNoFollow
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "schedule_id", referencedColumnName = "id")
     private Schedule schedule;
+
+    // parent id, for link injection
+    @Column(name = "schedule_id", columnDefinition = "binary(16)", insertable = false, updatable = false)
     private UUID scheduleId;
 
     @InjectLinks({
@@ -84,8 +115,13 @@ public class Request extends DomainTemplate implements Comparable<Request> {
             @InjectLink(value = "schedules/${instance.scheduleId}", rel = "schedule"),
             @InjectLink(value = "requests/${instance.id}/responses", rel = "responses") })
     @XmlJavaTypeAdapter(LinkAdapter.class)
+    @Transient
     private List<Link> links;
 
+    /**
+     * Default construct. Used for Injection and for default values (including
+     * random UUID)
+     */
     public Request() {
         super();
 
@@ -97,122 +133,142 @@ public class Request extends DomainTemplate implements Comparable<Request> {
         this.method = HttpMethods.GET;
     }
 
+    /**
+     * Constructor with id. TODO: Should be on api-template?
+     * 
+     * @param id
+     */
     public Request(UUID id) {
         this();
 
         this.setId(id);
     }
 
-    @Transient
+    /**
+     * Get links injected for HATEAOS
+     * 
+     * @return list of links, to be included in json
+     */
     @XmlElement(name = "_links")
     public List<Link> getLinks() {
         return links;
     }
 
-    @Column(length = 1024 * 128, nullable = true)
+    public String getTargetUri() {
+        return this.targetUri;
+    }
+
+    public void setTargetUri(String value) {
+        this.targetUri = value;
+    }
+
+    public Integer getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Integer value) {
+        this.priority = value;
+    }
+
     public String getContent() {
         return content;
     }
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @Column(name = "value")
-    @CollectionTable(name = "_request_headers", joinColumns = @JoinColumn(name = "request_id"))
+    public void setContent(String value) {
+        this.content = value;
+    }
+
     public Map<String, String> getHeaders() {
         return this.headers;
     }
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @Column(name = "rule")
-    @CollectionTable(name = "_request_extractors", joinColumns = @JoinColumn(name = "request_id"))
+    public void setHeaders(Map<String, String> map) {
+        this.headers = map;
+    }
+
     public Map<String, String> getExtractors() {
         return this.extractors;
     }
 
-    @Column
+    public void setExtractors(Map<String, String> map) {
+        this.extractors = map;
+    }
+
     public HttpMethods getMethod() {
         return this.method;
     }
 
-    @OneToMany(mappedBy = "request", targetEntity = Response.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    public void setMethod(HttpMethods value) {
+        this.method = value;
+    }
+
+    /**
+     * Return the set of children objects for this element. TODO: should be
+     * removed?
+     * 
+     * @return list of children objects
+     */
     @XmlTransient
     public List<Response> getResponses() {
         return this.responses;
     }
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "schedule_id", referencedColumnName = "id")
+    /**
+     * Set a new list of children objects for this element. TODO: should be
+     * removed?
+     * 
+     * @param list
+     *            list of children objects
+     */
+    public void setResponses(List<Response> list) {
+        this.responses = list;
+    }
+
+    /**
+     * Returns the parent object of this element. TODO: should be removed?
+     * 
+     * @return Parent Object
+     */
     @XmlTransient
     public Schedule getSchedule() {
         return this.schedule;
     }
 
-    @Column(name = "schedule_id", columnDefinition = "binary(16)", insertable = false, updatable = false)
+    /**
+     * Set the parent object of this element. TODO: should be removed?
+     * 
+     * @param value
+     *            The parent object
+     */
+    public void setSchedule(Schedule value) {
+        this.schedule = value;
+    }
+
+    /**
+     * Returns the parent id of this element. TODO: should be removed?
+     * 
+     * @return Parent Id
+     */
     public UUID getScheduleId() {
         return this.scheduleId;
     }
 
-    @Column(name = "target_uri")
-    public String getTargetUri() {
-        return this.targetUri;
+    /**
+     * Set the parent id of this element. TODO: should be removed?
+     * 
+     * @param value
+     *            The parent id
+     */
+    public void setScheduleId(UUID value) {
+        this.scheduleId = value;
     }
 
-    @Column
-    public Integer getPriority() {
-        return priority;
-    }
-
-    public void setPriority(Integer priority) {
-        this.priority = priority;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public void setHeaders(Map<String, String> headers) {
-        this.headers = headers;
-    }
-
-    public void setExtractors(Map<String, String> extractors) {
-        this.extractors = extractors;
-    }
-
-    public void setMethod(HttpMethods method) {
-        this.method = method;
-    }
-
-    public void setResponses(List<Response> responses) {
-        this.responses = responses;
-    }
-
-    public void setSchedule(Schedule schedule) {
-        this.schedule = schedule;
-    }
-
-    public void setTargetUri(String targetUri) {
-        this.targetUri = targetUri;
-    }
-
-    public void setScheduleId(UUID scheduleId) {
-        this.scheduleId = scheduleId;
-    }
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int compareTo(Request o) {
         return this.getPriority().compareTo(o.getPriority());
-    }
-
-    @Override
-    public String toString() {
-        String tmpContent = (content == null ? content
-                : content.replaceAll(" ", "").replaceAll("\\t", ""));
-        tmpContent = (tmpContent != null && tmpContent.length() > 255
-                ? tmpContent.substring(0, 255) + "(...)" : tmpContent);
-
-        return "Request [content=" + tmpContent + ", createdOn="
-                + this.getCreatedOn() + ", headers=" + headers + ", id="
-                + this.getId() + ", method=" + method + ", scheduleId="
-                + scheduleId + ", targetUri=" + targetUri + "]";
     }
 
     /**
@@ -221,7 +277,7 @@ public class Request extends DomainTemplate implements Comparable<Request> {
     public void process() {
         LOGGER.debug("Request Processing: " + this);
 
-        HttpUriRequest request = this.build();
+        HttpUriRequest request = this.extract();
 
         CloseableHttpClient httpclient = HttpClients.createDefault();
         CloseableHttpResponse response = null;
@@ -230,13 +286,13 @@ public class Request extends DomainTemplate implements Comparable<Request> {
 
             Response resp = new Response();
             resp.setRequest(this);
-            resp.peel(response);
+            resp.feed(response);
 
             LOGGER.debug("HTTPRequest completed, with response: " + resp);
 
             // JPA ensures that this will persist() when update
             // Memory Storage will handle this in DAO
-            this.getResponses().add(resp);
+            this.responses.add(resp);
 
             // update global context with variables
             this.schedule.addVariables(resp, this);
@@ -263,7 +319,7 @@ public class Request extends DomainTemplate implements Comparable<Request> {
      * 
      * @return HttpUriRequest instance
      */
-    HttpUriRequest build() {
+    HttpUriRequest extract() {
         HttpUriRequest ret;
 
         switch (method) {
@@ -334,4 +390,19 @@ public class Request extends DomainTemplate implements Comparable<Request> {
         return formattedContent;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        String tmpContent = (content == null ? content
+                : content.replaceAll(" ", "").replaceAll("\\t", ""));
+        tmpContent = (tmpContent != null && tmpContent.length() > 255
+                ? tmpContent.substring(0, 255) + "(...)" : tmpContent);
+
+        return "Request [content=" + tmpContent + ", createdOn="
+                + this.getCreatedOn() + ", headers=" + headers + ", id="
+                + this.getId() + ", method=" + method + ", scheduleId="
+                + scheduleId + ", targetUri=" + targetUri + "]";
+    }
 }

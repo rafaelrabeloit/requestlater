@@ -29,7 +29,7 @@ public class RequestTest extends Mockito {
         r.getHeaders().put("Accept-Encoding", "gzip, deflate, sdch, br");
         r.getHeaders().put("Accept-Language", "pt-BR,pt;q=0.8,en-US;q=0.4");
 
-        HttpUriRequest request = r.build();
+        HttpUriRequest request = r.extract();
 
         assertEquals("Request is not well-formed",
                 "GET http://localhost/ HTTP/1.1", request.toString());
@@ -68,7 +68,7 @@ public class RequestTest extends Mockito {
         schedule.getVariables().put("INFO",
                 Arrays.asList("Meu valor de variavel"));
 
-        HttpUriRequest request_result = request.build();
+        HttpUriRequest request_result = request.extract();
 
         assertEquals("Header not reconized as variable for another header",
                 schedule.getVariables().get("Content-Type").get(0),

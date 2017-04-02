@@ -44,13 +44,12 @@ import org.joda.time.chrono.ISOChronology;
 import org.joda.time.format.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.neptune.api.requestlater.DataExtractor;
-import com.neptune.api.template.adapter.LinkAdapter;
-import com.neptune.api.template.domain.DomainTemplate;
-
 import com.google.ical.compat.jodatime.DateTimeIterable;
 import com.google.ical.compat.jodatime.DateTimeIterator;
 import com.google.ical.compat.jodatime.DateTimeIteratorFactory;
+import com.neptune.api.requestlater.DataExtractor;
+import com.neptune.api.template.adapter.LinkAdapter;
+import com.neptune.api.template.domain.DomainTemplate;
 
 /**
  * Schedule Model.
@@ -102,6 +101,10 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
     @Transient
     private List<Link> links;
 
+    /**
+     * Default construct. Used for Injection and for default values (including
+     * random UUID)
+     */
     public Schedule() {
         super();
 
@@ -111,22 +114,53 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
         this.variables = new HashMap<>();
     }
 
+    /**
+     * Constructor with id. TODO: Should be on api-template?
+     * 
+     * @param id
+     */
     public Schedule(UUID id) {
         this();
 
         this.setId(id);
     }
 
+    /**
+     * Constructor with 'at' rule
+     * 
+     * @param at
+     *            rule for recurrence or scheduling
+     */
     public Schedule(String at) {
         this();
 
         this.setAt(at);
     }
 
+    /**
+     * Get links injected for HATEAOS
+     * 
+     * @return list of links, to be included in json
+     */
+    @XmlElement(name = "_links")
+    public List<Link> getLinks() {
+        return this.links;
+    }
+
+    /**
+     * @return Active state for this schedule
+     */
     public Boolean getActive() {
         return this.active;
     }
 
+    /**
+     * Set active state for element. It also sets incoming time to null if
+     * deactivating this schedule.
+     * 
+     * @param value
+     *            boolean value for active state.
+     */
     public void setActive(Boolean value) {
         this.active = value;
         if (!this.active) {
@@ -153,6 +187,11 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
         return this.lastTime;
     }
 
+    /**
+     * Set 'at' value for this schedule. Can be a simple date or a full RRule.
+     * 
+     * @return String containg date or RRule.
+     */
     public String getAt() {
         return this.at;
     }
@@ -184,16 +223,6 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
         }
     }
 
-    @XmlTransient
-    @JsonIgnore
-    public Set<Request> getRequests() {
-        return this.requests;
-    }
-
-    public void setRequests(Set<Request> set) {
-        this.requests = set;
-    }
-
     /**
      * Get the map of variables associated with this schedule.
      * 
@@ -206,11 +235,32 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
         return this.variables;
     }
 
-    @XmlElement(name = "_links")
-    public List<Link> getLinks() {
-        return this.links;
+    /**
+     * Return the set of children objects for this element. TODO: should be
+     * removed?
+     * 
+     * @return set of children objects
+     */
+    @XmlTransient
+    @JsonIgnore
+    public Set<Request> getRequests() {
+        return this.requests;
     }
 
+    /**
+     * Set a new set of children objects for this element. TODO: should be
+     * removed?
+     * 
+     * @param set
+     *            set of children objects
+     */
+    public void setRequests(Set<Request> set) {
+        this.requests = set;
+    }
+
+    /**
+     * Get delay until the firing of this schedule.
+     */
     @XmlTransient
     @Override
     public long getDelay(TimeUnit unit) {
@@ -218,6 +268,9 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
                 MILLISECONDS);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int compareTo(Delayed o) {
         if (o == this) {
@@ -227,6 +280,9 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
         return (diff < 0) ? -1 : (diff > 0) ? 1 : 0;
     }
 
+    /**
+     * Run this schedule, processing each request.
+     */
     @Override
     public void run() {
         LOGGER.debug("Firing " + this);
@@ -234,21 +290,13 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
         // In JPA, this will be Lazy Load, and the data will load accordingly
         // In Memory Storage, requests is ensured to be always referenced
         // correctly
-        LOGGER.debug("Running Requests: " + this.getRequests());
-        for (Request req : this.getRequests()) {
+        LOGGER.debug("Running Requests: " + this.requests);
+        for (Request req : this.requests) {
             req.process();
         }
 
         // calculate the next schedule time based on recurrence rule
         nextIncomingTime();
-    }
-
-    @Override
-    public String toString() {
-        return "Schedule [incomingTime=" + incomingTime + ", lastTime="
-                + lastTime + ", active=" + active + ", at=" + at
-                + ", variables=" + variables + ", getId()=" + getId()
-                + ", getCreatedOn()=" + getCreatedOn() + "]";
     }
 
     /**
@@ -275,6 +323,10 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
 
     }
 
+    /**
+     * Calculate the next incoming time for this schedule. TODO: should be
+     * private
+     */
     public void nextIncomingTime() {
         LOGGER.trace("nextIncomingTime {");
 
@@ -366,5 +418,16 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
         }
 
         LOGGER.trace("nextIncomingTime }");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return "Schedule [incomingTime=" + incomingTime + ", lastTime="
+                + lastTime + ", active=" + active + ", at=" + at
+                + ", variables=" + variables + ", getId()=" + getId()
+                + ", getCreatedOn()=" + getCreatedOn() + "]";
     }
 }

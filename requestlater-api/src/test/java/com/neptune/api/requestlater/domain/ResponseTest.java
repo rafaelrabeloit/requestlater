@@ -69,7 +69,7 @@ public class ResponseTest extends Mockito {
                 ContentType.create("text/plain", "UTF-8")));
 
         Response r = new Response();
-        r.peel(response);
+        r.feed(response);
 
         assertEquals("Failed to retrieve status", 200,
                 r.getStatusCode().intValue());
