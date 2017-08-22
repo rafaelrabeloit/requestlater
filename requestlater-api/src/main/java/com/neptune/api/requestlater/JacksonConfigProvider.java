@@ -8,7 +8,9 @@ import javax.ws.rs.ext.Provider;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
+import com.neptune.api.requestlater.domain.Schedule;
 
 /**
  * Overrides Jackson provider, for how to serialize dates
@@ -29,10 +31,11 @@ public class JacksonConfigProvider implements ContextResolver<ObjectMapper> {
         final ObjectMapper map = new ObjectMapper();
 
         map.setSerializationInclusion(Include.NON_DEFAULT);
-        map.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-        map.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"));
+        map.setDateFormat(new SimpleDateFormat(Schedule.DATE_FORMAT));
         //TODO: THIS SEEMS TO BE MISSING WHEN CUSTOM CONFIG IS ADDED
         map.registerModule(new JaxbAnnotationModule());
+        map.registerModule(new JSR310Module());
+        map.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         return map;
     }

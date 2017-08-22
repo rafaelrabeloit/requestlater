@@ -94,9 +94,9 @@ public class SchedulingIntegrationTest {
 
         DateTime at = DateTime.now().plusSeconds(3);
 
-        prepare("true", at.toString());
+        prepare("true", at.toString("yyyy-MM-dd'T'HH:mm:ss.SSSZ"));
 
-        waitResponses(at.plusSeconds(1));
+        waitResponses(at.plusSeconds(5));
 
         assertNotEquals(
                 "Delayed Request didn't work because didn't generate Responses",
@@ -140,9 +140,9 @@ public class SchedulingIntegrationTest {
 
         DateTime at = DateTime.now().plusSeconds(3);
 
-        prepare("false", at.toString());
+        prepare("false", at.toString("yyyy-MM-dd'T'HH:mm:ss.SSSZ"));
 
-        waitResponses(at.plusSeconds(1));
+        waitResponses(at.plusSeconds(2));
 
         assertEquals("Delayed Request didn't work because there are Responses",
                 "[]", body);

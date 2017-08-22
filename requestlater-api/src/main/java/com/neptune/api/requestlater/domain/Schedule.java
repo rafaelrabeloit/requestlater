@@ -1,16 +1,19 @@
 package com.neptune.api.requestlater.domain;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-
+import java.sql.Date;
 import java.text.ParseException;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
@@ -24,8 +27,6 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.ws.rs.core.Link;
 import javax.xml.bind.annotation.XmlElement;
@@ -38,15 +39,11 @@ import org.apache.logging.log4j.Logger;
 import org.glassfish.jersey.linking.InjectLink;
 import org.glassfish.jersey.linking.InjectLinkNoFollow;
 import org.glassfish.jersey.linking.InjectLinks;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.chrono.ISOChronology;
-import org.joda.time.format.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.google.ical.compat.jodatime.DateTimeIterable;
-import com.google.ical.compat.jodatime.DateTimeIterator;
-import com.google.ical.compat.jodatime.DateTimeIteratorFactory;
+import com.google.ical.compat.javautil.DateIterable;
+import com.google.ical.compat.javautil.DateIterator;
+import com.google.ical.compat.javautil.DateIteratorFactory;
 import com.neptune.api.requestlater.DataExtractor;
 import com.neptune.api.template.adapter.LinkAdapter;
 import com.neptune.api.template.domain.DomainTemplate;
@@ -62,19 +59,30 @@ import com.neptune.api.template.domain.DomainTemplate;
 @XmlRootElement
 public class Schedule extends DomainTemplate implements Delayed, Runnable {
 
-    private static final long serialVersionUID = -3131395094924167679L;
+    /**
+     * DateTime format accepted for this schedule mechanism.
+     */
+    public static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 
+    /**
+     * Logger
+     */
     static final Logger LOGGER = LogManager.getLogger(Schedule.class);
 
+    // Formatter used to convert strings to Instant (other options are zoneless)
+    private static final DateTimeFormatter FMT = new DateTimeFormatterBuilder()
+            .appendPattern(DATE_FORMAT).toFormatter();
+
+    // serial version uid
+    private static final long serialVersionUID = -3131395094924167679L;
+
     // time for this schedule to fire
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "incoming_time", nullable = true)
-    private Date incomingTime;
+    private Instant incomingTime;
 
     // the last time it was fired
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_time", nullable = true)
-    private Date lastTime;
+    private Instant lastTime;
 
     // if it is active at the moment or not
     @Column(name = "active", nullable = false)
@@ -101,6 +109,10 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
     @Transient
     private List<Link> links;
 
+    // system (or mocked) clock instance
+    @Transient
+    private Clock clock;
+
     /**
      * Default construct. Used for Injection and for default values (including
      * random UUID)
@@ -112,12 +124,26 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
 
         this.requests = new HashSet<Request>();
         this.variables = new HashMap<>();
+        this.clock = Clock.systemUTC();
+    }
+
+    /**
+     * Constructor with clock. Used mostly for testing.
+     * 
+     * @param clock
+     *            used to control this schedule
+     */
+    public Schedule(Clock clock) {
+        this();
+
+        this.clock = clock;
     }
 
     /**
      * Constructor with id. TODO: Should be on api-template?
      * 
-     * @param id for this element
+     * @param id
+     *            for this element
      */
     public Schedule(UUID id) {
         this();
@@ -172,25 +198,25 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
      * Get the closes time that this schedule is appointed for. Null if this
      * schedule is inactive. Read-only by the API.
      * 
-     * @return Date when this schedule should fire. Null if it is inactive.
+     * @return Instant when this schedule should fire. Null if it is inactive.
      */
-    public Date getIncomingTime() {
+    public Instant getIncomingTime() {
         return this.incomingTime;
     }
 
     /**
      * Get the last time that this schedule was fired. Read-only by the API.
      * 
-     * @return Date when this schedule last fired. Null if there was none.
+     * @return Instant when this schedule last fired. Null if there was none.
      */
-    public Date getLastTime() {
+    public Instant getLastTime() {
         return this.lastTime;
     }
 
     /**
      * Set 'at' value for this schedule. Can be a simple date or a full RRule.
      * 
-     * @return String containg date or RRule.
+     * @return String containing date or RRule.
      */
     public String getAt() {
         return this.at;
@@ -215,11 +241,7 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
         if (value.startsWith("RRULE:")) {
             this.nextIncomingTime();
         } else {
-            this.incomingTime = DateTimeFormat
-                    .forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ")
-                    .withLocale(Locale.ROOT)
-                    .withChronology(ISOChronology.getInstanceUTC())
-                    .parseDateTime(value).toDate();
+            this.incomingTime = FMT.parse(value, Instant::from);
         }
     }
 
@@ -263,9 +285,12 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
      */
     @XmlTransient
     @Override
-    public long getDelay(TimeUnit unit) {
-        return unit.convert(incomingTime.getTime() - System.currentTimeMillis(),
-                MILLISECONDS);
+    public long getDelay(TimeUnit unit) { // TODO: consider TimeUnit
+        LOGGER.trace("getDelay (" + unit + ") {");
+        long delay = Instant.now(this.clock).until(this.incomingTime,
+                ChronoUnit.MILLIS);
+        LOGGER.trace("getDelay } -> " + delay);
+        return delay;
     }
 
     /**
@@ -276,7 +301,8 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
         if (o == this) {
             return 0;
         }
-        long diff = this.getDelay(MILLISECONDS) - o.getDelay(MILLISECONDS);
+        long diff = this.getDelay(null) - o.getDelay(null); // TODO: consider
+                                                            // TimeUnit
         return (diff < 0) ? -1 : (diff > 0) ? 1 : 0;
     }
 
@@ -346,12 +372,14 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
             return;
         }
 
+        // if last time is null, then base is 'now'
+        Instant base = this.clock.instant().truncatedTo(ChronoUnit.SECONDS);
+
         // if the foreseen time is still to come, then it is still valid and use
         // it instead
-        if (this.incomingTime != null && this.incomingTime.getTime() > DateTime
-                .now().withMillisOfSecond(0).getMillis()) {
-            LOGGER.debug("incomingTime " + incomingTime + " still valid. "
-                    + "Keep using it.");
+        if (this.incomingTime != null && this.incomingTime.isAfter(base)) {
+            LOGGER.debug("incomingTime " + this.incomingTime + " still valid "
+                    + "against " + base + ". Then we are gonna keep using it.");
             LOGGER.trace("nextIncomingTime }");
             return;
         }
@@ -366,25 +394,26 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
             return;
         }
 
-        // if last time is null, then base is 'now'
-        DateTime base = new DateTime(this.getLastTime()).withMillisOfSecond(0);
+        // if last time is not null, then it is the base
+        if (this.getLastTime() != null) {
+            base = this.getLastTime();
+        }
 
         try {
             // generate a iteratable range of date times
-            DateTimeIterable range = DateTimeIteratorFactory
-                    .createDateTimeIterable(this.at, base, DateTimeZone.UTC,
-                            true);
+            DateIterable range = DateIteratorFactory.createDateIterable(this.at,
+                    Date.from(base), TimeZone.getTimeZone("UTC"), true);
 
             // get an iterator to range of date times
-            DateTimeIterator it = range.iterator();
+            DateIterator it = range.iterator();
 
             // iterate until a date that is greater than now and not null
             base = null;
             while (it.hasNext()) {
-                base = it.next();
+                base = it.next().toInstant();
                 LOGGER.debug("next it " + base);
-                DateTime now = DateTime.now().plusSeconds(1)
-                        .withMillisOfSecond(0);
+                Instant now = Instant.now(this.clock).plusSeconds(1)
+                        .truncatedTo(ChronoUnit.SECONDS);
                 if (base != null && base.isAfter(now)) {
                     LOGGER.debug("base found at " + base + " as after " + now);
                     break;
@@ -403,7 +432,7 @@ public class Schedule extends DomainTemplate implements Delayed, Runnable {
                 }
 
                 // the schedule is the next time
-                this.incomingTime = base.toDate();
+                this.incomingTime = base;
                 LOGGER.debug("New incomingTime is " + this.incomingTime);
             } else {
                 // If there is NOT another iteration for this watcher, then
